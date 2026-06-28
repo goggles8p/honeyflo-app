@@ -419,6 +419,26 @@ a{color:var(--amber-soft)}
 <script>
 "use strict";
 
+/* ---------- analytics (GoatCounter, cookieless, no PII) ---------- */
+/* Set GC_CODE to your GoatCounter site name, e.g. "honeyflo" for
+   honeyflo.goatcounter.com. Leave empty to disable all tracking. */
+const GC_CODE = "honeyflo";
+(function initAnalytics(){
+  if(!GC_CODE) return;
+  const s=document.createElement('script');
+  s.async=true;
+  s.src='//gc.zgo.at/count.js';
+  s.setAttribute('data-goatcounter', `https://${GC_CODE}.goatcounter.com/count`);
+  document.head.appendChild(s);
+})();
+function track(path, title){
+  try{
+    if(GC_CODE && window.goatcounter && window.goatcounter.count){
+      window.goatcounter.count({path, title, event:true});
+    }
+  }catch(e){}
+}
+
 /* ---------- bloom calendar ---------- */
 const CAL = {
   SC: [
@@ -741,6 +761,9 @@ form.addEventListener('submit', async e=>{
 
     render(city,state,result);
     setLoading(false);
+    track('lookup', 'ZIP lookup');
+    track('verdict/'+result.verdict, 'Verdict '+result.verdict);
+    track('state/'+state, 'State '+state);
   }catch(err){
     setLoading(false);
     if(err && err.kind==='geo') showError('That ZIP code was not found. Check it and try again.');
@@ -873,6 +896,7 @@ function render(city,state,r){
     <div class="credit">
       Weather by <b>Open-Meteo</b>, location by <b>Zippopotam</b>, bloom read by HoneyFlo's built in regional model.
       This is a planning aid, not a substitute for opening the hive. Your scale and frame checks are the final word.
+      ${GC_CODE?'<br>Anonymous, cookieless usage counts via GoatCounter. No personal data and no cookies.':''}
     </div>
   `;
 
