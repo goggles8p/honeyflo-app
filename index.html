@@ -354,6 +354,53 @@ a{color:var(--amber-soft)}
 .pnote{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.4}
 .empty{color:var(--muted);font-size:14px;padding:6px 0 16px;line-height:1.5}
 
+/* clickable plant rows + wiki panel */
+.plant.has-wiki{cursor:pointer}
+.chev{
+  margin-left:auto;
+  align-self:center;
+  font-family:var(--data);
+  font-size:18px;
+  line-height:1;
+  color:var(--muted);
+  transition:transform .2s, color .2s;
+}
+.plant.has-wiki:hover .pname{color:var(--amber-soft)}
+.plant.has-wiki:hover .chev{color:var(--amber-soft)}
+.plant.open .chev{transform:rotate(90deg);color:var(--amber)}
+.plant.has-wiki:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:8px}
+.wiki{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed var(--line-soft);
+  align-items:flex-start;
+}
+.wiki-img{
+  width:124px;height:96px;
+  object-fit:cover;
+  border-radius:8px;
+  flex:0 0 auto;
+  background:var(--bg2);
+  border:1px solid var(--line-soft);
+}
+.wiki-body{flex:1 1 auto;min-width:0}
+.wiki-extract{font-size:13.5px;color:var(--ink);line-height:1.5}
+.wiki-link{
+  display:inline-block;
+  margin-top:8px;
+  font-family:var(--data);
+  font-size:12px;
+  letter-spacing:.04em;
+  color:var(--amber);
+}
+.wiki-load,.wiki-err{font-size:13px;color:var(--muted)}
+@media (max-width:520px){
+  .wiki{flex-direction:column}
+  .wiki-img{width:100%;height:170px}
+}
+
 /* footnote */
 .foot{
   margin-top:18px;
@@ -533,6 +580,60 @@ const STATE_ZONE = (()=>{
 function zoneFor(state){ return STATE_ZONE[(state||'').toUpperCase()] || 'NE'; }
 
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+/* ---------- Wikipedia article per calendar plant (verified titles) ---------- */
+const WIKI = {
+  'Red maple and elm':'Acer rubrum',
+  'Henbit and dandelion':'Lamium amplexicaule',
+  'Fruit trees and redbud':'Cercis canadensis',
+  'Huajillo':'Senegalia berlandieri',
+  'White and crimson clover':'Clover',
+  'Mesquite':'Mesquite',
+  'Privet and ligustrum':'Ligustrum',
+  'Blackberry and dewberry':'Blackberry',
+  'Horsemint':'Monarda citriodora',
+  'Vitex':'Vitex agnus-castus',
+  'Cotton':'Cotton',
+  'Crepe myrtle':'Lagerstroemia',
+  'Goldenrod':'Solidago',
+  'Aster and broomweed':'Aster (genus)',
+  'Red maple':'Acer rubrum',
+  'Wild plum and fruit trees':'Prunus americana',
+  'Tulip poplar':'Liriodendron tulipifera',
+  'Black locust':'Robinia pseudoacacia',
+  'Clover and wildflowers':'Clover',
+  'Holly and gallberry':'Ilex glabra',
+  'Chinese tallow':'Triadica sebifera',
+  'Sumac':'Sumac',
+  'Sourwood':'Oxydendrum',
+  'Cotton and soybean':'Cotton',
+  'Aster':'Aster (genus)',
+  'Red and silver maple':'Acer rubrum',
+  'Dandelion':'Taraxacum',
+  'Fruit trees':'Malus',
+  'White and sweet clover':'Clover',
+  'Basswood and linden':'Tilia',
+  'Maple and willow':'Acer rubrum',
+  'Fruit and black locust':'Robinia pseudoacacia',
+  'White, sweet and alsike clover':'Clover',
+  'Alfalfa':'Alfalfa',
+  'Soybean':'Soybean',
+  'Willow and fruit trees':'Salix',
+  'Mesquite and desert bloom':'Mesquite',
+  'Russian olive':'Elaeagnus angustifolia',
+  'Yellow and white sweetclover':'Melilotus',
+  'Alfalfa and clover':'Alfalfa',
+  'Sunflower':'Helianthus',
+  'Rabbitbrush':'Ericameria nauseosa',
+  'Almond and fruit bloom':'Almond',
+  'Mustard and wildflowers':'Mustard plant',
+  'Manzanita and ceanothus':'Manzanita',
+  'Orange and citrus':'Orange blossom',
+  'Black sage and white sage':'Salvia mellifera',
+  'Star thistle':'Centaurea solstitialis',
+  'Fireweed':'Chamaenerion angustifolium',
+  'Goldenrod and aster':'Solidago'
+};
 
 /* ---------- helpers ---------- */
 function esc(s){
@@ -771,6 +872,58 @@ form.addEventListener('submit', async e=>{
   }
 });
 
+/* ---------- plant wiki panels (Wikipedia REST summary, lazy + cached) ---------- */
+const wikiCache={};
+function wikiTitleEnc(title){ return encodeURIComponent(title.replace(/ /g,'_')); }
+async function loadWiki(title, panel){
+  panel.innerHTML='<div class="wiki-load">Loading from Wikipedia...</div>';
+  try{
+    if(!wikiCache[title]){
+      const r=await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+wikiTitleEnc(title));
+      if(!r.ok) throw new Error('http');
+      wikiCache[title]=await r.json();
+    }
+    const d=wikiCache[title];
+    const img=(d.thumbnail&&d.thumbnail.source)||'';
+    const page=(d.content_urls&&d.content_urls.desktop&&d.content_urls.desktop.page)
+      || ('https://en.wikipedia.org/wiki/'+wikiTitleEnc(title));
+    panel.innerHTML=
+      (img?`<img class="wiki-img" src="${esc(img)}" alt="${esc(d.title||title)}">`:'')+
+      `<div class="wiki-body">`+
+        `<div class="wiki-extract">${esc(d.extract||'No summary available.')}</div>`+
+        `<a class="wiki-link" href="${esc(page)}" target="_blank" rel="noopener">Read more on Wikipedia ↗</a>`+
+      `</div>`;
+  }catch(e){
+    const url='https://en.wikipedia.org/w/index.php?search='+encodeURIComponent(title);
+    panel.innerHTML=`<div class="wiki-err">Could not load a preview right now. `+
+      `<a class="wiki-link" href="${esc(url)}" target="_blank" rel="noopener">Search Wikipedia ↗</a></div>`;
+  }
+}
+function togglePlant(plant){
+  const title=plant.getAttribute('data-wiki');
+  if(!title) return;
+  const panel=plant.querySelector('.wiki');
+  const open=plant.classList.toggle('open');
+  plant.setAttribute('aria-expanded', open?'true':'false');
+  panel.hidden=!open;
+  if(open && !panel.dataset.loaded){
+    panel.dataset.loaded='1';
+    loadWiki(title, panel);
+    track('plant/'+title, 'Plant '+title);
+  }
+}
+resultsEl.addEventListener('click', e=>{
+  if(e.target.closest('a')) return;        // let links work
+  if(e.target.closest('.wiki')) return;    // ignore clicks inside an open panel
+  const plant=e.target.closest('.plant.has-wiki');
+  if(plant) togglePlant(plant);
+});
+resultsEl.addEventListener('keydown', e=>{
+  if(e.key!=='Enter' && e.key!==' ') return;
+  const plant=e.target.closest && e.target.closest('.plant.has-wiki');
+  if(plant && e.target===plant){ e.preventDefault(); togglePlant(plant); }
+});
+
 function bandLabels(score){
   return {
     dearth: score<=33,
@@ -805,13 +958,16 @@ function render(city,state,r){
   if(r.bloomNow.length){
     nowHTML=r.bloomNow.map(s=>{
       const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
-      return `<div class="plant">
+      const wt=WIKI[s.n]||'';
+      return `<div class="plant${wt?' has-wiki':''}"${wt?` data-wiki="${esc(wt)}" tabindex="0" role="button" aria-expanded="false"`:''}>
         <div class="prow">
           <span class="pname">${esc(s.n)}</span>
           <span class="pill ${s.t}">${esc(tlabel)}</span>
           ${s.mag==='major'?'<span class="pill major">Major</span>':''}
+          ${wt?'<span class="chev" aria-hidden="true">&rsaquo;</span>':''}
         </div>
         <div class="pnote">${esc(s.note)}</div>
+        ${wt?'<div class="wiki" hidden></div>':''}
       </div>`;
     }).join('');
   } else {
@@ -825,13 +981,16 @@ function render(city,state,r){
       const s=c.s;
       const win=MONTHS[c.openMonth-1];
       const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
-      return `<div class="plant">
+      const wt=WIKI[s.n]||'';
+      return `<div class="plant${wt?' has-wiki':''}"${wt?` data-wiki="${esc(wt)}" tabindex="0" role="button" aria-expanded="false"`:''}>
         <div class="prow">
           <span class="pname">${esc(s.n)}</span>
           <span class="pill">${esc(win)}</span>
           <span class="pill ${s.t}">${esc(tlabel)}</span>
+          ${wt?'<span class="chev" aria-hidden="true">&rsaquo;</span>':''}
         </div>
         <div class="pnote">${esc(s.note)}</div>
+        ${wt?'<div class="wiki" hidden></div>':''}
       </div>`;
     }).join('');
   } else {
@@ -896,6 +1055,7 @@ function render(city,state,r){
     <div class="credit">
       Weather by <b>Open-Meteo</b>, location by <b>Zippopotam</b>, bloom read by HoneyFlo's built in regional model.
       This is a planning aid, not a substitute for opening the hive. Your scale and frame checks are the final word.
+      <br>Tap any plant for a photo and summary from <b>Wikipedia</b>.
       ${GC_CODE?'<br>Anonymous, cookieless usage counts via GoatCounter. No personal data and no cookies.':''}
     </div>
   `;
