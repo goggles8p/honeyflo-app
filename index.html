@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HoneyFlo — is your area in a nectar flow?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d1611;
+  --bg2:#122017;
+  --panel:#16241b;
+  --ink:#ECE6D6;
+  --muted:#8B9A86;
+  --amber:#F4A82C;
+  --amber-soft:#E8C77A;
+  --dearth:#6E8294;
+  --transition:#C9A24B;
+  --line:rgba(236,230,214,0.12);
+  --line-soft:rgba(236,230,214,0.07);
+  --good:#F4A82C;
+  --mid:#C9A24B;
+  --poor:#6E8294;
+  --display:'Fraunces',Georgia,serif;
+  --body:'Inter',system-ui,sans-serif;
+  --data:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 50% -10%, var(--bg2), transparent 70%),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.wrap{
+  max-width:920px;
+  margin:0 auto;
+  padding:32px 20px 96px;
+}
+a{color:var(--amber-soft)}
+
+/* header */
+.wordmark{
+  font-family:var(--data);
+  font-size:14px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--amber);
+  display:flex;
+  align-items:center;
+  gap:.55em;
+}
+.wordmark .dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--amber);
+  box-shadow:0 0 12px var(--amber);
+}
+.hero{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:clamp(30px,7vw,52px);
+  line-height:1.05;
+  margin:26px 0 12px;
+  letter-spacing:-0.01em;
+}
+.hero em{color:var(--amber);font-style:normal}
+.sub{
+  color:var(--muted);
+  max-width:54ch;
+  margin:0 0 28px;
+}
+
+/* form */
+.form{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:stretch;
+}
+.zip{
+  flex:1 1 200px;
+  min-width:0;
+  font-family:var(--data);
+  font-size:20px;
+  letter-spacing:.22em;
+  color:var(--ink);
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 16px;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.zip::placeholder{color:var(--muted);letter-spacing:.16em}
+.zip:focus{
+  border-color:var(--amber);
+  box-shadow:0 0 0 3px rgba(244,168,44,0.18);
+}
+.go{
+  flex:0 0 auto;
+  font-family:var(--data);
+  font-size:14px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#1a1206;
+  background:var(--amber);
+  border:none;
+  border-radius:12px;
+  padding:14px 26px;
+  cursor:pointer;
+  font-weight:500;
+  transition:transform .12s, background .15s, opacity .15s;
+}
+.go:hover{background:#ffba3e}
+.go:active{transform:translateY(1px)}
+.go:disabled{opacity:.5;cursor:default}
+.hint{
+  color:var(--muted);
+  font-size:13px;
+  margin:12px 2px 0;
+}
+
+/* loading */
+.loading{margin-top:28px;display:none}
+.loading.on{display:block}
+.bar{
+  height:3px;
+  border-radius:3px;
+  background:var(--line-soft);
+  overflow:hidden;
+  position:relative;
+}
+.bar::after{
+  content:'';
+  position:absolute;
+  left:-40%;top:0;bottom:0;width:40%;
+  background:linear-gradient(90deg,transparent,var(--amber),transparent);
+  animation:slide 1.1s infinite;
+}
+@keyframes slide{to{left:100%}}
+.status{
+  font-family:var(--data);
+  font-size:13px;
+  color:var(--amber-soft);
+  margin-top:12px;
+  letter-spacing:.02em;
+}
+
+/* error */
+.error{
+  display:none;
+  margin-top:20px;
+  background:rgba(150,60,55,0.16);
+  border:1px solid rgba(210,110,100,0.32);
+  color:#f3d4cf;
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:15px;
+}
+.error.on{display:block}
+
+/* results */
+.results{display:none;margin-top:36px}
+.results.on{display:block;animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.placeline{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:12px;
+  font-family:var(--data);
+  font-size:13px;
+  letter-spacing:.04em;
+  color:var(--muted);
+  border-bottom:1px solid var(--line-soft);
+  padding-bottom:12px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.placeline .city{color:var(--ink);text-transform:uppercase}
+
+/* verdict panel */
+.verdict{
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:26px 24px 28px;
+  overflow:hidden;
+}
+.verdict .glow{
+  position:absolute;
+  inset:-40% 30% auto -10%;
+  height:240px;
+  background:radial-gradient(closest-side, rgba(244,168,44,0.22), transparent);
+  opacity:0;
+  transition:opacity .6s;
+  pointer-events:none;
+}
+.verdict.flow .glow{opacity:1}
+.vlabel{
+  font-family:var(--data);
+  font-size:12px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.vword{
+  font-family:var(--display);
+  font-weight:600;
+  font-size:clamp(34px,9vw,58px);
+  line-height:1.04;
+  margin:6px 0 10px;
+  letter-spacing:-0.015em;
+}
+.verdict.flow .vword{color:var(--amber)}
+.verdict.transition .vword{color:var(--transition)}
+.verdict.dearth .vword{color:var(--dearth)}
+.vsummary{
+  position:relative;
+  color:var(--ink);
+  max-width:62ch;
+  margin:0 0 22px;
+}
+
+/* gauge */
+.gauge{margin-top:18px}
+.track{
+  position:relative;
+  height:14px;
+  border-radius:10px;
+  background:linear-gradient(90deg,#445663 0%,#7b8a7a 34%,#caa24f 60%,#F4A82C 100%);
+}
+.marker{
+  position:absolute;
+  top:50%;
+  width:22px;height:22px;
+  border-radius:50%;
+  background:var(--ink);
+  border:3px solid var(--bg);
+  box-shadow:0 2px 10px rgba(0,0,0,.5);
+  transform:translate(-50%,-50%);
+  left:0;
+  transition:left .9s cubic-bezier(.2,.7,.2,1);
+}
+.scaleLabels{
+  display:flex;
+  justify-content:space-between;
+  margin-top:12px;
+  font-family:var(--data);
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.scaleLabels span{transition:color .3s}
+.scaleLabels span.active{color:var(--ink)}
+
+/* metric tiles */
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-top:18px;
+}
+.tile{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px 16px 18px;
+}
+.tile .tlabel{
+  font-family:var(--data);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;align-items:center;gap:7px;
+}
+.statusdot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.statusdot.good{background:var(--good);box-shadow:0 0 8px var(--good)}
+.statusdot.mid{background:var(--mid)}
+.statusdot.poor{background:var(--poor)}
+.tile .tnum{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:26px;
+  margin:10px 0 4px;
+  line-height:1.1;
+}
+.tile .tsub{
+  color:var(--muted);
+  font-size:12.5px;
+  line-height:1.4;
+}
+
+/* bloom columns */
+.blooms{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:18px;
+}
+.col{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px 18px 8px;
+}
+.col h3{
+  font-family:var(--data);
+  font-size:12px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--amber-soft);
+  margin:0 0 6px;
+  font-weight:500;
+}
+.plant{
+  padding:13px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.plant:last-child{border-bottom:none}
+.prow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pname{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:18px;
+}
+.pill{
+  font-family:var(--data);
+  font-size:10.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  color:var(--muted);
+  white-space:nowrap;
+}
+.pill.nectar{color:var(--amber);border-color:rgba(244,168,44,.4)}
+.pill.both{color:var(--amber-soft);border-color:rgba(232,199,122,.35)}
+.pill.pollen{color:var(--muted)}
+.pill.major{color:var(--amber)}
+.pnote{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.4}
+.empty{color:var(--muted);font-size:14px;padding:6px 0 16px;line-height:1.5}
+
+/* footnote */
+.foot{
+  margin-top:18px;
+  background:var(--bg2);
+  border:1px solid var(--line-soft);
+  border-radius:14px;
+  padding:16px 18px;
+}
+.foot .conf{
+  font-family:var(--data);
+  font-size:12px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--amber-soft);
+  margin-bottom:7px;
+}
+.foot .conf b{color:var(--ink)}
+.foot .caution{color:var(--muted);font-size:13.5px;line-height:1.5;margin:0}
+
+.credit{
+  margin-top:34px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.6;
+  border-top:1px solid var(--line-soft);
+  padding-top:18px;
+}
+.credit b{color:var(--amber-soft);font-weight:500}
+
+@media (max-width:680px){
+  .tiles{grid-template-columns:1fr}
+  .blooms{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="wordmark"><span class="dot"></span>HoneyFlo</div>
+    <h1 class="hero">Is your area in a <em>nectar flow</em>?</h1>
+    <p class="sub">Type a US ZIP code. HoneyFlo reads local weather against a regional bloom calendar to tell you whether honey bees are in a flow, a dearth, or the turn between them, and names what is blooming now and what is coming up.</p>
+  </header>
+
+  <form class="form" id="form" autocomplete="off">
+    <input class="zip" id="zip" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="ZIP code" aria-label="US ZIP code">
+    <button class="go" id="go" type="submit">Read the flow</button>
+  </form>
+  <div class="hint">Works offline once loaded. No account, no keys. Five digit US ZIP only.</div>
+
+  <div class="loading" id="loading">
+    <div class="bar"></div>
+    <div class="status" id="status">Locating ZIP...</div>
+  </div>
+
+  <div class="error" id="error" role="alert"></div>
+
+  <section class="results" id="results" aria-live="polite"></section>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- bloom calendar ---------- */
+const CAL = {
+  SC: [
+    {n:'Red maple and elm', t:'both', m:[2,3], mag:'minor', note:'Earliest pollen and a little nectar that wakes the colony up.'},
+    {n:'Henbit and dandelion', t:'pollen', m:[2,3,4], mag:'minor', note:'Ground bloom pollen that builds the first spring brood.'},
+    {n:'Fruit trees and redbud', t:'both', m:[3,4], mag:'minor', note:'Light nectar with strong early pollen.'},
+    {n:'Huajillo', t:'nectar', m:[3,4], mag:'major', note:'Premier south Texas nectar where it grows in the brush country.'},
+    {n:'White and crimson clover', t:'nectar', m:[4,5], mag:'major', note:'Backbone of the Texas spring flow.'},
+    {n:'Mesquite', t:'nectar', m:[4,5], mag:'major', note:'Heavy spring nectar across central and south Texas.'},
+    {n:'Privet and ligustrum', t:'nectar', m:[4,5], mag:'major', note:'Strong urban and fencerow nectar in late spring.'},
+    {n:'Blackberry and dewberry', t:'both', m:[4,5], mag:'minor', note:'Reliable hedgerow nectar and pollen.'},
+    {n:'Horsemint', t:'nectar', m:[5,6], mag:'major', note:'Aromatic lemon beebalm nectar across the prairies into early summer.'},
+    {n:'Vitex', t:'both', m:[5,6,7], mag:'minor', note:'Dependable urban nectar and pollen well into summer.'},
+    {n:'Cotton', t:'nectar', m:[6,7,8], mag:'minor', note:'Field nectar where cotton is grown nearby.'},
+    {n:'Crepe myrtle', t:'pollen', m:[6,7,8], mag:'minor', note:'Summer pollen with little nectar.'},
+    {n:'Goldenrod', t:'both', m:[9,10], mag:'major', note:'The main fall flow that fills the winter stores.'},
+    {n:'Aster and broomweed', t:'both', m:[9,10,11], mag:'major', note:'Fall nectar and pollen working alongside goldenrod.'}
+  ],
+  SE: [
+    {n:'Red maple', t:'both', m:[1,2], mag:'minor', note:'First pollen of the year in the coastal plain.'},
+    {n:'Wild plum and fruit trees', t:'both', m:[2,3], mag:'minor', note:'Early nectar and brood building pollen.'},
+    {n:'Tulip poplar', t:'nectar', m:[3,4,5], mag:'major', note:'Big early nectar in the Piedmont and southern Appalachians.'},
+    {n:'Black locust', t:'nectar', m:[4], mag:'major', note:'Intense but brief upper southeast nectar.'},
+    {n:'Clover and wildflowers', t:'nectar', m:[3,4,5], mag:'major', note:'Broad spring nectar across pastures and roadsides.'},
+    {n:'Holly and gallberry', t:'nectar', m:[4,5], mag:'major', note:'Premier light coastal plain honey.'},
+    {n:'Chinese tallow', t:'nectar', m:[5,6], mag:'major', note:'Drives a heavy early summer flow on the Gulf coast.'},
+    {n:'Sumac', t:'nectar', m:[5,6], mag:'minor', note:'Steady early summer nectar.'},
+    {n:'Sourwood', t:'nectar', m:[6,7], mag:'major', note:'Prized mountain nectar in the southern Appalachians.'},
+    {n:'Cotton and soybean', t:'nectar', m:[6,7,8], mag:'minor', note:'Row crop nectar where fields are nearby.'},
+    {n:'Goldenrod', t:'both', m:[9,10], mag:'major', note:'The fall flow that makes winter stores.'},
+    {n:'Aster', t:'both', m:[9,10,11], mag:'major', note:'Late nectar and pollen for winter bees.'}
+  ],
+  NE: [
+    {n:'Red and silver maple', t:'both', m:[3,4], mag:'minor', note:'Earliest pollen that restarts brood rearing.'},
+    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First real nectar and pollen of spring.'},
+    {n:'Fruit trees', t:'both', m:[4,5], mag:'minor', note:'Orchard nectar and strong pollen.'},
+    {n:'Black locust', t:'nectar', m:[5], mag:'major', note:'Intense but short late spring nectar.'},
+    {n:'Tulip poplar', t:'nectar', m:[5,6], mag:'major', note:'Heavy mid-Atlantic nectar from the yellow poplar.'},
+    {n:'White and sweet clover', t:'nectar', m:[5,6,7], mag:'major', note:'The main summer flow across the region.'},
+    {n:'Basswood and linden', t:'nectar', m:[6,7], mag:'major', note:'A strong but brief midsummer flow.'},
+    {n:'Sumac', t:'nectar', m:[6,7], mag:'minor', note:'Reliable early summer nectar.'},
+    {n:'Goldenrod', t:'both', m:[8,9,10], mag:'major', note:'The fall flow that builds winter stores.'},
+    {n:'Aster and knotweed', t:'both', m:[9,10], mag:'major', note:'Final nectar and pollen before winter.'}
+  ],
+  MW: [
+    {n:'Maple and willow', t:'both', m:[3,4], mag:'minor', note:'Early pollen to wake the colony.'},
+    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First broad nectar and pollen of spring.'},
+    {n:'Fruit and black locust', t:'nectar', m:[5], mag:'minor', note:'Brief late spring nectar.'},
+    {n:'White, sweet and alsike clover', t:'nectar', m:[5,6,7], mag:'major', note:'Backbone of the upper midwest flow.'},
+    {n:'Basswood and linden', t:'nectar', m:[6,7], mag:'major', note:'Strong short midsummer nectar.'},
+    {n:'Alfalfa', t:'nectar', m:[6,7,8], mag:'major', note:'Heavy nectar where alfalfa is grown for hay or seed.'},
+    {n:'Soybean', t:'nectar', m:[7,8], mag:'minor', note:'Field nectar in good years.'},
+    {n:'Goldenrod', t:'both', m:[8,9,10], mag:'major', note:'The main fall flow for winter stores.'},
+    {n:'Aster', t:'both', m:[9,10], mag:'major', note:'Late season nectar and pollen.'}
+  ],
+  MT: [
+    {n:'Willow and fruit trees', t:'both', m:[3,4], mag:'minor', note:'Early pollen along creeks and orchards.'},
+    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First spring nectar at lower elevations.'},
+    {n:'Mesquite and desert bloom', t:'nectar', m:[3,4,5], mag:'minor', note:'Desert nectar in the low country of the southwest.'},
+    {n:'Russian olive', t:'nectar', m:[5,6], mag:'major', note:'Fragrant nectar along western waterways.'},
+    {n:'Yellow and white sweetclover', t:'nectar', m:[6,7,8], mag:'major', note:'Roadside sweetclover yields heavily in the interior west.'},
+    {n:'Alfalfa and clover', t:'nectar', m:[6,7,8], mag:'major', note:'Irrigated alfalfa and clover are the western workhorses.'},
+    {n:'Sunflower', t:'both', m:[7,8,9], mag:'minor', note:'Field nectar and abundant pollen.'},
+    {n:'Rabbitbrush', t:'both', m:[8,9,10], mag:'major', note:'Late pungent western nectar that tops off stores.'}
+  ],
+  PAC: [
+    {n:'Almond and fruit bloom', t:'both', m:[2,3], mag:'minor', note:'Pollination bloom rather than a surplus flow.'},
+    {n:'Mustard and wildflowers', t:'nectar', m:[2,3,4], mag:'major', note:'Early California valley and foothill nectar.'},
+    {n:'Manzanita and ceanothus', t:'nectar', m:[3,4], mag:'minor', note:'Chaparral nectar in the coast ranges.'},
+    {n:'Orange and citrus', t:'nectar', m:[3,4,5], mag:'major', note:'Orange blossom nectar where citrus grows.'},
+    {n:'Black sage and white sage', t:'nectar', m:[4,5,6], mag:'major', note:'Coveted California sage honey.'},
+    {n:'Blackberry', t:'nectar', m:[5,6,7], mag:'major', note:'Heavy reliable nectar in the Pacific Northwest.'},
+    {n:'Star thistle', t:'nectar', m:[6,7,8,9], mag:'major', note:'Prolific California summer nectar.'},
+    {n:'Fireweed', t:'nectar', m:[7,8], mag:'major', note:'Sought after mountain flow in the Northwest.'},
+    {n:'Goldenrod and aster', t:'both', m:[9,10], mag:'minor', note:'Light fall forage along the coast.'}
+  ]
+};
+
+const REGION = {
+  SE:'FL GA SC NC AL MS LA TN AR KY',
+  NE:'VA WV MD DE PA NJ NY CT RI MA VT NH ME OH MI IN',
+  MW:'IL WI MN IA MO KS NE ND SD',
+  SC:'TX OK',
+  MT:'CO WY MT ID UT NV AZ NM',
+  PAC:'CA OR WA'
+};
+const STATE_ZONE = (()=>{
+  const map={};
+  for(const z in REGION){ REGION[z].split(' ').forEach(s=>map[s]=z); }
+  return map;
+})();
+function zoneFor(state){ return STATE_ZONE[(state||'').toUpperCase()] || 'NE'; }
+
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+/* ---------- helpers ---------- */
+function esc(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function round(v){return Math.round(v);}
+function todayISO(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+}
+function joinList(arr){
+  if(!arr.length) return 'Forage';
+  if(arr.length===1) return arr[0];
+  if(arr.length===2) return arr[0]+' and '+arr[1];
+  return arr.slice(0,-1).join(', ')+' and '+arr[arr.length-1];
+}
+function isAre(arr){ return arr.length>1 ? 'are' : 'is'; }
+function lower(s){ return String(s).charAt(0).toLowerCase()+String(s).slice(1); }
+function isNectar(t){ return t==='nectar'||t==='both'; }
+
+/* ---------- weather computations ---------- */
+function gddDay(tmax,tmin){
+  if(tmax==null||tmin==null) return 0;
+  return Math.max(0, ((tmax+tmin)/2) - 50);
+}
+function foragingClass(curTemp, maxArr, precArr, todayIdx){
+  let warmDays=0, wetDays=0;
+  for(let i=todayIdx+1; i<=todayIdx+5 && i<maxArr.length; i++){
+    if(maxArr[i]!=null && maxArr[i]>=60) warmDays++;
+    if(precArr[i]!=null && precArr[i]>=0.4) wetDays++;
+  }
+  if(curTemp<50 || warmDays<=1) return 'Too cold';
+  if(wetDays>=3) return 'Rain bound';
+  if(curTemp>=60 && warmDays>=3) return 'Flying';
+  return 'Marginal';
+}
+
+/* ---------- bloom model ---------- */
+function runModel(ctx){
+  const {city, state, month:M, curTemp, rain30, seasonGDD, gdd30, forage} = ctx;
+  const zone = zoneFor(state);
+  const sources = CAL[zone];
+
+  const active = sources.filter(s=>s.m.includes(M));
+  const majorNow = active.filter(s=>isNectar(s.t) && s.mag==='major');
+  const minorNow = active.filter(s=>isNectar(s.t) && s.mag==='minor');
+  const n = majorNow.length;
+
+  let score = n===0?16 : n===1?56 : n===2?73 : 86;
+  score += Math.min(8, minorNow.length*3);
+
+  const wmult = forage==='Flying'?1 : forage==='Marginal'?0.82 : forage==='Rain bound'?0.78 : 0.5;
+  score = round(score*wmult);
+
+  if(M>=4 && M<=9 && rain30<0.6) score = round(score*0.85);
+  score = clamp(score,5,98);
+
+  const verdict = score>=67?'flow' : score>=34?'transition':'dearth';
+
+  // next month major nectar count
+  const nextM = M===12?1:M+1;
+  const nextMajor = sources.filter(s=>s.m.includes(nextM) && isNectar(s.t) && s.mag==='major').length;
+
+  let headline;
+  if(verdict==='flow') headline='Flow on';
+  else if(verdict==='dearth') headline='Dearth';
+  else headline = nextMajor>n ? 'Flow building' : nextMajor<n ? 'Flow tapering' : 'Patchy flow';
+
+  // blooming now: major before minor, cap 5
+  const bloomNow = active.slice().sort((a,b)=>(a.mag==='major'?0:1)-(b.mag==='major'?0:1)).slice(0,5);
+
+  // coming up
+  const comingMap = new Map();
+  const activeNames = new Set(active.map(s=>s.n));
+  for(let k=1;k<=3;k++){
+    let mm = M+k; while(mm>12) mm-=12;
+    sources.forEach(s=>{
+      if(s.m.includes(mm) && !activeNames.has(s.n)){
+        // dedupe, keep earliest opening month within the scan window
+        const existing = comingMap.get(s.n);
+        if(!existing || k<existing.k){
+          comingMap.set(s.n, {s, k, openMonth:mm});
+        }
+      }
+    });
+  }
+  let coming = Array.from(comingMap.values());
+  // drop minor pollen-only sources
+  coming = coming.filter(c=> !(c.s.mag==='minor' && c.s.t==='pollen'));
+  coming.sort((a,b)=>{
+    if(a.k!==b.k) return a.k-b.k;
+    return (a.s.mag==='major'?0:1)-(b.s.mag==='major'?0:1);
+  });
+  coming = coming.slice(0,5);
+
+  // summary
+  const topNames = majorNow.map(s=>s.n);
+  let summary;
+  if(verdict==='flow'){
+    summary = `${joinList(topNames)} ${isAre(topNames)} yielding and the weather is letting bees fly. Nectar should be coming into the hive now.`;
+  } else if(verdict==='dearth'){
+    if(active.length){
+      summary = `No major nectar sources are open for your area, only lighter forage like ${lower(active[0].n)}. Colonies are mostly living on stores. Watch hive weight and guard against robbing.`;
+    } else {
+      summary = `No significant nectar or pollen is open for your area right now. Colonies are living on stores. Watch hive weight and guard against robbing.`;
+    }
+  } else { // transition
+    if(forage!=='Flying' && topNames.length){
+      summary = `${joinList(topNames)} ${isAre(topNames)} in bloom, but ${lower(forage)} conditions are holding the foragers back, so little is reaching the hive.`;
+    } else if(headline==='Flow building'){
+      summary = `Spring sources are just opening. Expect the flow to strengthen over the next few weeks as more comes into bloom.`;
+    } else {
+      summary = `The main flow is tapering as the season turns. A slower stretch is likely before the next major bloom.`;
+    }
+  }
+
+  const confidence = (score>76||score<24)?'high':'moderate';
+  const caution = `This is a regional model. Forage shifts with elevation, local plantings, and a season running early or late. Your hive scale and frame checks are the final word for ${city}.`;
+
+  return {zone,score,verdict,headline,summary,confidence,caution,bloomNow,coming,active,
+          seasonGDD,gdd30,rain30,forage,curTemp};
+}
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+const form=$('form'), zipIn=$('zip'), goBtn=$('go');
+const loadingEl=$('loading'), statusEl=$('status'), errorEl=$('error'), resultsEl=$('results');
+
+zipIn.addEventListener('input',()=>{
+  zipIn.value=zipIn.value.replace(/\D/g,'').slice(0,5);
+});
+
+function showError(msg){
+  errorEl.textContent=msg;
+  errorEl.classList.add('on');
+}
+function clearError(){ errorEl.classList.remove('on'); errorEl.textContent=''; }
+function setLoading(on,msg){
+  loadingEl.classList.toggle('on',on);
+  if(msg) statusEl.textContent=msg;
+  goBtn.disabled=on;
+}
+
+async function fetchJSON(url){
+  const r=await fetch(url);
+  if(!r.ok){ const e=new Error('http'); e.status=r.status; throw e; }
+  return r.json();
+}
+
+form.addEventListener('submit', async e=>{
+  e.preventDefault();
+  clearError();
+  resultsEl.classList.remove('on');
+  const zip=zipIn.value.trim();
+  if(!/^\d{5}$/.test(zip)){ showError('Enter a valid 5 digit US ZIP code.'); return; }
+
+  setLoading(true, `Locating ZIP ${zip}...`);
+  try{
+    // 1. geocode
+    let geo;
+    try{ geo=await fetchJSON(`https://api.zippopotam.us/us/${zip}`); }
+    catch(err){
+      if(err.status){ throw {kind:'geo'}; }
+      throw {kind:'forecast'};
+    }
+    const place=geo.places && geo.places[0];
+    if(!place){ throw {kind:'geo'}; }
+    const lat=parseFloat(place.latitude), lon=parseFloat(place.longitude);
+    const city=place['place name'], state=place['state abbreviation'];
+
+    // 2. forecast
+    setLoading(true,'Pulling 90 days of local weather...');
+    const fUrl=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
+      `&current=temperature_2m,precipitation`+
+      `&daily=temperature_2m_max,temperature_2m_min,precipitation_sum`+
+      `&past_days=92&forecast_days=14&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=auto`;
+    let wx;
+    try{ wx=await fetchJSON(fUrl); }
+    catch(err){ throw {kind:'forecast'}; }
+
+    const curTemp=wx.current.temperature_2m;
+    const days=wx.daily.time;
+    const tmax=wx.daily.temperature_2m_max;
+    const tmin=wx.daily.temperature_2m_min;
+    const prec=wx.daily.precipitation_sum;
+
+    let todayIdx=days.indexOf(todayISO());
+    if(todayIdx<0) todayIdx=days.length-15;
+
+    // rainfall last 30 days ending today
+    let rain30=0;
+    for(let i=Math.max(0,todayIdx-29); i<=todayIdx; i++){ if(prec[i]!=null) rain30+=prec[i]; }
+    rain30=Math.round(rain30*100)/100;
+
+    // 30 day gdd
+    let gdd30=0;
+    for(let i=Math.max(0,todayIdx-29); i<=todayIdx; i++){ gdd30+=gddDay(tmax[i],tmin[i]); }
+    gdd30=round(gdd30);
+
+    const forage=foragingClass(curTemp,tmax,prec,todayIdx);
+
+    // 3. season gdd (optional)
+    setLoading(true,'Measuring the season with growing degree days...');
+    let seasonGDD=null;
+    try{
+      const now=new Date();
+      const end=new Date(now.getTime()-5*86400000);
+      const p=x=>String(x).padStart(2,'0');
+      const endStr=end.getFullYear()+'-'+p(end.getMonth()+1)+'-'+p(end.getDate());
+      const year=now.getFullYear();
+      const aUrl=`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}`+
+        `&start_date=${year}-01-01&end_date=${endStr}`+
+        `&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=auto`;
+      const arc=await fetchJSON(aUrl);
+      let s=0; const am=arc.daily.temperature_2m_max, an=arc.daily.temperature_2m_min;
+      for(let i=0;i<am.length;i++){ s+=gddDay(am[i],an[i]); }
+      seasonGDD=round(s);
+    }catch(err){ seasonGDD=null; }
+
+    // 4. model
+    setLoading(true,'Reading the regional bloom calendar...');
+    const month=new Date().getMonth()+1;
+    const result=runModel({city,state,month,curTemp,rain30,seasonGDD,gdd30,forage});
+
+    render(city,state,result);
+    setLoading(false);
+  }catch(err){
+    setLoading(false);
+    if(err && err.kind==='geo') showError('That ZIP code was not found. Check it and try again.');
+    else showError('Could not reach the weather service. Try again in a moment.');
+  }
+});
+
+function bandLabels(score){
+  return {
+    dearth: score<=33,
+    transition: score>=34 && score<=66,
+    flow: score>=67
+  };
+}
+
+function render(city,state,r){
+  const dateStr=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  // metric copy
+  let rainCopy;
+  if(r.rain30<1) rainCopy='Dry. Low soil moisture can cut nectar secretion.';
+  else if(r.rain30>6) rainCopy='Very wet. Heavy rain can dilute or wash out nectar.';
+  else rainCopy='Moisture in a workable range for nectar production.';
+
+  let gddNum, gddCopy;
+  if(r.seasonGDD!=null){ gddNum=r.seasonGDD; gddCopy=`${r.seasonGDD} season. Heat accumulated since Jan 1. Drives bloom timing in your area.`; }
+  else { gddNum=r.gdd30; gddCopy=`${r.gdd30} 30d. Recent heat accumulation. Drives near term bloom timing.`; }
+
+  let dotClass, forageSub;
+  if(r.forage==='Flying'){ dotClass='good'; forageSub='Warm and dry enough for foragers to work.'; }
+  else if(r.forage==='Marginal'){ dotClass='mid'; forageSub='Borderline flying weather, light foraging at best.'; }
+  else if(r.forage==='Rain bound'){ dotClass='mid'; forageSub='Wet stretch ahead keeps bees in the hive.'; }
+  else { dotClass='poor'; forageSub='Too cold for bees to fly and forage.'; }
+
+  const band=bandLabels(r.score);
+
+  // blooming now rows
+  let nowHTML;
+  if(r.bloomNow.length){
+    nowHTML=r.bloomNow.map(s=>{
+      const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
+      return `<div class="plant">
+        <div class="prow">
+          <span class="pname">${esc(s.n)}</span>
+          <span class="pill ${s.t}">${esc(tlabel)}</span>
+          ${s.mag==='major'?'<span class="pill major">Major</span>':''}
+        </div>
+        <div class="pnote">${esc(s.note)}</div>
+      </div>`;
+    }).join('');
+  } else {
+    nowHTML=`<div class="empty">Nothing significant is open right now. Colonies are drawing on stores. Keep entrances reduced and watch for robbing.</div>`;
+  }
+
+  // coming up rows
+  let comeHTML;
+  if(r.coming.length){
+    comeHTML=r.coming.map(c=>{
+      const s=c.s;
+      const win=MONTHS[c.openMonth-1];
+      const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
+      return `<div class="plant">
+        <div class="prow">
+          <span class="pname">${esc(s.n)}</span>
+          <span class="pill">${esc(win)}</span>
+          <span class="pill ${s.t}">${esc(tlabel)}</span>
+        </div>
+        <div class="pnote">${esc(s.note)}</div>
+      </div>`;
+    }).join('');
+  } else {
+    comeHTML=`<div class="empty">No major sources are opening in the next few weeks for your area.</div>`;
+  }
+
+  resultsEl.innerHTML=`
+    <div class="placeline">
+      <span class="city">${esc(city)}, ${esc(state)}</span>
+      <span>${esc(dateStr)}</span>
+    </div>
+
+    <div class="verdict ${r.verdict}">
+      <div class="glow"></div>
+      <div class="vlabel">Flow verdict</div>
+      <div class="vword">${esc(r.headline)}</div>
+      <p class="vsummary">${esc(r.summary)}</p>
+      <div class="gauge">
+        <div class="track"><div class="marker" id="marker"></div></div>
+        <div class="scaleLabels">
+          <span class="${band.dearth?'active':''}">Dearth</span>
+          <span class="${band.transition?'active':''}">Transition</span>
+          <span class="${band.flow?'active':''}">Flow</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile">
+        <div class="tlabel"><span class="statusdot ${dotClass}"></span>Foraging weather</div>
+        <div class="tnum">${esc(r.forage)}</div>
+        <div class="tsub">${esc(forageSub)}</div>
+      </div>
+      <div class="tile">
+        <div class="tlabel">Rainfall 30 days</div>
+        <div class="tnum">${r.rain30.toFixed(2)}"</div>
+        <div class="tsub">${esc(rainCopy)}</div>
+      </div>
+      <div class="tile">
+        <div class="tlabel">Growing degree days</div>
+        <div class="tnum">${gddNum}</div>
+        <div class="tsub">${esc(gddCopy)}</div>
+      </div>
+    </div>
+
+    <div class="blooms">
+      <div class="col">
+        <h3>Blooming now</h3>
+        ${nowHTML}
+      </div>
+      <div class="col">
+        <h3>Coming up</h3>
+        ${comeHTML}
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="conf">Confidence <b>${esc(r.confidence)}</b> · flow score ${r.score} / 100</div>
+      <p class="caution">${esc(r.caution)}</p>
+    </div>
+
+    <div class="credit">
+      Weather by <b>Open-Meteo</b>, location by <b>Zippopotam</b>, bloom read by HoneyFlo's built in regional model.
+      This is a planning aid, not a substitute for opening the hive. Your scale and frame checks are the final word.
+    </div>
+  `;
+
+  resultsEl.classList.add('on');
+  // animate gauge marker after layout
+  const marker=$('marker');
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ marker.style.left=r.score+'%'; }); });
+  resultsEl.scrollIntoView({behavior:(matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'), block:'start'});
+}
+</script>
+</body>
+</html>
