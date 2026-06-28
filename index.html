@@ -489,78 +489,104 @@ function track(path, title){
 /* ---------- bloom calendar ---------- */
 const CAL = {
   SC: [
-    {n:'Red maple and elm', t:'both', m:[2,3], mag:'minor', note:'Earliest pollen and a little nectar that wakes the colony up.'},
-    {n:'Henbit and dandelion', t:'pollen', m:[2,3,4], mag:'minor', note:'Ground bloom pollen that builds the first spring brood.'},
-    {n:'Fruit trees and redbud', t:'both', m:[3,4], mag:'minor', note:'Light nectar with strong early pollen.'},
-    {n:'Huajillo', t:'nectar', m:[3,4], mag:'major', note:'Premier south Texas nectar where it grows in the brush country.'},
-    {n:'White and crimson clover', t:'nectar', m:[4,5], mag:'major', note:'Backbone of the Texas spring flow.'},
-    {n:'Mesquite', t:'nectar', m:[4,5], mag:'major', note:'Heavy spring nectar across central and south Texas.'},
-    {n:'Privet and ligustrum', t:'nectar', m:[4,5], mag:'major', note:'Strong urban and fencerow nectar in late spring.'},
-    {n:'Blackberry and dewberry', t:'both', m:[4,5], mag:'minor', note:'Reliable hedgerow nectar and pollen.'},
-    {n:'Horsemint', t:'nectar', m:[5,6], mag:'major', note:'Aromatic lemon beebalm nectar across the prairies into early summer.'},
-    {n:'Vitex', t:'both', m:[5,6,7], mag:'minor', note:'Dependable urban nectar and pollen well into summer.'},
-    {n:'Cotton', t:'nectar', m:[6,7,8], mag:'minor', note:'Field nectar where cotton is grown nearby.'},
-    {n:'Crepe myrtle', t:'pollen', m:[6,7,8], mag:'minor', note:'Summer pollen with little nectar.'},
-    {n:'Goldenrod', t:'both', m:[9,10], mag:'major', note:'The main fall flow that fills the winter stores.'},
-    {n:'Aster and broomweed', t:'both', m:[9,10,11], mag:'major', note:'Fall nectar and pollen working alongside goldenrod.'}
+    {n:'Red maple', t:'both', m:[2,3], mag:'minor', note:'Earliest pollen with a little nectar that wakes the colony up.', w:'Acer rubrum'},
+    {n:'Elm', t:'pollen', m:[2,3], mag:'minor', note:'Wind borne pollen the bees gather on warm late winter days.', w:'Ulmus'},
+    {n:'Henbit', t:'pollen', m:[2,3,4], mag:'minor', note:'Low purple ground bloom that builds the first spring brood.', w:'Lamium amplexicaule'},
+    {n:'Dandelion', t:'both', m:[2,3,4], mag:'minor', note:'Roadside nectar and pollen for the early brood.', w:'Taraxacum'},
+    {n:'Redbud', t:'both', m:[3,4], mag:'minor', note:'Pink spring blossoms with light nectar and strong pollen.', w:'Cercis canadensis'},
+    {n:'Mexican plum', t:'both', m:[3,4], mag:'minor', note:'Native plum bloom with early nectar and brood pollen.', w:'Prunus mexicana'},
+    {n:'Huajillo', t:'nectar', m:[3,4], mag:'major', note:'Premier south Texas nectar in the brush country.', w:'Senegalia berlandieri'},
+    {n:'Crimson clover', t:'nectar', m:[4,5], mag:'major', note:'Deep red field clover with strong spring nectar.', w:'Trifolium incarnatum'},
+    {n:'White clover', t:'nectar', m:[4,5,6], mag:'major', note:'Backbone pasture and lawn nectar of the Texas spring.', w:'Trifolium repens'},
+    {n:'Honey mesquite', t:'nectar', m:[4,5], mag:'major', note:'Heavy spring nectar across central and south Texas.', w:'Prosopis glandulosa'},
+    {n:'Privet', t:'nectar', m:[4,5], mag:'major', note:'Strong fencerow and urban nectar in late spring.', w:'Privet'},
+    {n:'Dewberry', t:'both', m:[3,4], mag:'minor', note:'Trailing bramble with reliable early nectar and pollen.', w:'Dewberry'},
+    {n:'Blackberry', t:'both', m:[4,5], mag:'minor', note:'Hedgerow nectar and pollen.', w:'Blackberry'},
+    {n:'Horsemint', t:'nectar', m:[5,6], mag:'major', note:'Aromatic lemon beebalm nectar across the prairies.', w:'Monarda citriodora'},
+    {n:'Vitex', t:'both', m:[5,6,7], mag:'minor', note:'Dependable urban nectar and pollen into summer.', w:'Vitex agnus-castus'},
+    {n:'Cotton', t:'nectar', m:[6,7,8], mag:'minor', note:'Field nectar where cotton is grown nearby.', w:'Cotton'},
+    {n:'Crepe myrtle', t:'pollen', m:[6,7,8], mag:'minor', note:'Summer pollen with little nectar.', w:'Lagerstroemia'},
+    {n:'Goldenrod', t:'both', m:[9,10], mag:'major', note:'The main fall flow that fills the winter stores.', w:'Solidago'},
+    {n:'Aster', t:'both', m:[9,10,11], mag:'major', note:'Fall nectar and pollen for the winter bees.', w:'Aster (genus)'},
+    {n:'Broomweed', t:'both', m:[9,10], mag:'minor', note:'Yellow fall bloom working alongside the goldenrod.', w:'Amphiachyris dracunculoides'}
   ],
   SE: [
-    {n:'Red maple', t:'both', m:[1,2], mag:'minor', note:'First pollen of the year in the coastal plain.'},
-    {n:'Wild plum and fruit trees', t:'both', m:[2,3], mag:'minor', note:'Early nectar and brood building pollen.'},
-    {n:'Tulip poplar', t:'nectar', m:[3,4,5], mag:'major', note:'Big early nectar in the Piedmont and southern Appalachians.'},
-    {n:'Black locust', t:'nectar', m:[4], mag:'major', note:'Intense but brief upper southeast nectar.'},
-    {n:'Clover and wildflowers', t:'nectar', m:[3,4,5], mag:'major', note:'Broad spring nectar across pastures and roadsides.'},
-    {n:'Holly and gallberry', t:'nectar', m:[4,5], mag:'major', note:'Premier light coastal plain honey.'},
-    {n:'Chinese tallow', t:'nectar', m:[5,6], mag:'major', note:'Drives a heavy early summer flow on the Gulf coast.'},
-    {n:'Sumac', t:'nectar', m:[5,6], mag:'minor', note:'Steady early summer nectar.'},
-    {n:'Sourwood', t:'nectar', m:[6,7], mag:'major', note:'Prized mountain nectar in the southern Appalachians.'},
-    {n:'Cotton and soybean', t:'nectar', m:[6,7,8], mag:'minor', note:'Row crop nectar where fields are nearby.'},
-    {n:'Goldenrod', t:'both', m:[9,10], mag:'major', note:'The fall flow that makes winter stores.'},
-    {n:'Aster', t:'both', m:[9,10,11], mag:'major', note:'Late nectar and pollen for winter bees.'}
+    {n:'Red maple', t:'both', m:[1,2], mag:'minor', note:'First pollen of the year in the coastal plain.', w:'Acer rubrum'},
+    {n:'Wild plum', t:'both', m:[2,3], mag:'minor', note:'Early native plum nectar and brood pollen.', w:'Prunus americana'},
+    {n:'Peach', t:'both', m:[2,3], mag:'minor', note:'Orchard bloom with early nectar and strong pollen.', w:'Prunus persica'},
+    {n:'Tulip poplar', t:'nectar', m:[3,4,5], mag:'major', note:'Big early nectar in the Piedmont and southern Appalachians.', w:'Liriodendron tulipifera'},
+    {n:'Black locust', t:'nectar', m:[4], mag:'major', note:'Intense but brief upper southeast nectar.', w:'Robinia pseudoacacia'},
+    {n:'White clover', t:'nectar', m:[3,4,5], mag:'major', note:'Broad spring nectar across pastures and roadsides.', w:'Trifolium repens'},
+    {n:'Vetch', t:'nectar', m:[3,4], mag:'minor', note:'Roadside legume nectar through early spring.', w:'Vicia sativa'},
+    {n:'Gallberry', t:'nectar', m:[4,5], mag:'major', note:'Premier light coastal plain honey.', w:'Ilex glabra'},
+    {n:'American holly', t:'both', m:[4,5], mag:'minor', note:'Tree holly nectar and pollen in the woods.', w:'Ilex opaca'},
+    {n:'Chinese tallow', t:'nectar', m:[5,6], mag:'major', note:'Drives a heavy early summer flow on the Gulf coast.', w:'Triadica sebifera'},
+    {n:'Sumac', t:'nectar', m:[5,6], mag:'minor', note:'Steady early summer nectar.', w:'Sumac'},
+    {n:'Sourwood', t:'nectar', m:[6,7], mag:'major', note:'Prized mountain nectar in the southern Appalachians.', w:'Oxydendrum'},
+    {n:'Cotton', t:'nectar', m:[6,7,8], mag:'minor', note:'Row crop nectar where fields are nearby.', w:'Cotton'},
+    {n:'Soybean', t:'nectar', m:[7,8], mag:'minor', note:'Field nectar in good years.', w:'Soybean'},
+    {n:'Goldenrod', t:'both', m:[9,10], mag:'major', note:'The fall flow that makes the winter stores.', w:'Solidago'},
+    {n:'Aster', t:'both', m:[9,10,11], mag:'major', note:'Late nectar and pollen for the winter bees.', w:'Aster (genus)'}
   ],
   NE: [
-    {n:'Red and silver maple', t:'both', m:[3,4], mag:'minor', note:'Earliest pollen that restarts brood rearing.'},
-    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First real nectar and pollen of spring.'},
-    {n:'Fruit trees', t:'both', m:[4,5], mag:'minor', note:'Orchard nectar and strong pollen.'},
-    {n:'Black locust', t:'nectar', m:[5], mag:'major', note:'Intense but short late spring nectar.'},
-    {n:'Tulip poplar', t:'nectar', m:[5,6], mag:'major', note:'Heavy mid-Atlantic nectar from the yellow poplar.'},
-    {n:'White and sweet clover', t:'nectar', m:[5,6,7], mag:'major', note:'The main summer flow across the region.'},
-    {n:'Basswood and linden', t:'nectar', m:[6,7], mag:'major', note:'A strong but brief midsummer flow.'},
-    {n:'Sumac', t:'nectar', m:[6,7], mag:'minor', note:'Reliable early summer nectar.'},
-    {n:'Goldenrod', t:'both', m:[8,9,10], mag:'major', note:'The fall flow that builds winter stores.'},
-    {n:'Aster and knotweed', t:'both', m:[9,10], mag:'major', note:'Final nectar and pollen before winter.'}
+    {n:'Red maple', t:'both', m:[3,4], mag:'minor', note:'Earliest pollen that restarts brood rearing.', w:'Acer rubrum'},
+    {n:'Silver maple', t:'both', m:[3], mag:'minor', note:'Very early maple pollen and a trace of nectar.', w:'Acer saccharinum'},
+    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First real nectar and pollen of spring.', w:'Taraxacum'},
+    {n:'Apple', t:'both', m:[4,5], mag:'minor', note:'Orchard bloom with nectar and strong pollen.', w:'Malus'},
+    {n:'Black locust', t:'nectar', m:[5], mag:'major', note:'Intense but short late spring nectar.', w:'Robinia pseudoacacia'},
+    {n:'Tulip poplar', t:'nectar', m:[5,6], mag:'major', note:'Heavy mid-Atlantic nectar from the yellow poplar.', w:'Liriodendron tulipifera'},
+    {n:'White clover', t:'nectar', m:[5,6,7], mag:'major', note:'The main summer flow across the region.', w:'Trifolium repens'},
+    {n:'Sweet clover', t:'nectar', m:[6,7], mag:'major', note:'Tall roadside legume with heavy summer nectar.', w:'Melilotus'},
+    {n:'Basswood', t:'nectar', m:[6,7], mag:'major', note:'A strong but brief midsummer flow from the lindens.', w:'Tilia'},
+    {n:'Sumac', t:'nectar', m:[6,7], mag:'minor', note:'Reliable early summer nectar.', w:'Sumac'},
+    {n:'Goldenrod', t:'both', m:[8,9,10], mag:'major', note:'The fall flow that builds the winter stores.', w:'Solidago'},
+    {n:'Aster', t:'both', m:[9,10], mag:'major', note:'Final nectar and pollen before winter.', w:'Aster (genus)'},
+    {n:'Knotweed', t:'both', m:[9,10], mag:'minor', note:'Late nectar from the invasive knotweed thickets.', w:'Reynoutria japonica'}
   ],
   MW: [
-    {n:'Maple and willow', t:'both', m:[3,4], mag:'minor', note:'Early pollen to wake the colony.'},
-    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First broad nectar and pollen of spring.'},
-    {n:'Fruit and black locust', t:'nectar', m:[5], mag:'minor', note:'Brief late spring nectar.'},
-    {n:'White, sweet and alsike clover', t:'nectar', m:[5,6,7], mag:'major', note:'Backbone of the upper midwest flow.'},
-    {n:'Basswood and linden', t:'nectar', m:[6,7], mag:'major', note:'Strong short midsummer nectar.'},
-    {n:'Alfalfa', t:'nectar', m:[6,7,8], mag:'major', note:'Heavy nectar where alfalfa is grown for hay or seed.'},
-    {n:'Soybean', t:'nectar', m:[7,8], mag:'minor', note:'Field nectar in good years.'},
-    {n:'Goldenrod', t:'both', m:[8,9,10], mag:'major', note:'The main fall flow for winter stores.'},
-    {n:'Aster', t:'both', m:[9,10], mag:'major', note:'Late season nectar and pollen.'}
+    {n:'Maple', t:'both', m:[3,4], mag:'minor', note:'Early maple pollen to wake the colony.', w:'Acer rubrum'},
+    {n:'Willow', t:'both', m:[3,4], mag:'minor', note:'Pussy willow pollen and a little nectar along streams.', w:'Salix'},
+    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First broad nectar and pollen of spring.', w:'Taraxacum'},
+    {n:'Apple', t:'both', m:[5], mag:'minor', note:'Orchard bloom in late spring.', w:'Malus'},
+    {n:'Black locust', t:'nectar', m:[5], mag:'major', note:'Brief but intense late spring nectar.', w:'Robinia pseudoacacia'},
+    {n:'White clover', t:'nectar', m:[5,6,7], mag:'major', note:'Backbone of the upper midwest flow.', w:'Trifolium repens'},
+    {n:'Sweet clover', t:'nectar', m:[6,7], mag:'major', note:'Tall roadside legume yielding heavily in summer.', w:'Melilotus'},
+    {n:'Alsike clover', t:'nectar', m:[6,7], mag:'major', note:'Pink and white clover prized for light honey.', w:'Trifolium hybridum'},
+    {n:'Basswood', t:'nectar', m:[6,7], mag:'major', note:'Strong short midsummer nectar from the lindens.', w:'Tilia'},
+    {n:'Alfalfa', t:'nectar', m:[6,7,8], mag:'major', note:'Heavy nectar where alfalfa is grown for hay or seed.', w:'Alfalfa'},
+    {n:'Soybean', t:'nectar', m:[7,8], mag:'minor', note:'Field nectar in good years.', w:'Soybean'},
+    {n:'Goldenrod', t:'both', m:[8,9,10], mag:'major', note:'The main fall flow for the winter stores.', w:'Solidago'},
+    {n:'Aster', t:'both', m:[9,10], mag:'major', note:'Late season nectar and pollen.', w:'Aster (genus)'}
   ],
   MT: [
-    {n:'Willow and fruit trees', t:'both', m:[3,4], mag:'minor', note:'Early pollen along creeks and orchards.'},
-    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First spring nectar at lower elevations.'},
-    {n:'Mesquite and desert bloom', t:'nectar', m:[3,4,5], mag:'minor', note:'Desert nectar in the low country of the southwest.'},
-    {n:'Russian olive', t:'nectar', m:[5,6], mag:'major', note:'Fragrant nectar along western waterways.'},
-    {n:'Yellow and white sweetclover', t:'nectar', m:[6,7,8], mag:'major', note:'Roadside sweetclover yields heavily in the interior west.'},
-    {n:'Alfalfa and clover', t:'nectar', m:[6,7,8], mag:'major', note:'Irrigated alfalfa and clover are the western workhorses.'},
-    {n:'Sunflower', t:'both', m:[7,8,9], mag:'minor', note:'Field nectar and abundant pollen.'},
-    {n:'Rabbitbrush', t:'both', m:[8,9,10], mag:'major', note:'Late pungent western nectar that tops off stores.'}
+    {n:'Willow', t:'both', m:[3,4], mag:'minor', note:'Early creekside pollen and a little nectar.', w:'Salix'},
+    {n:'Brittlebush', t:'both', m:[3,4], mag:'minor', note:'Yellow desert daisy with early pollen and nectar in the southwest.', w:'Encelia farinosa'},
+    {n:'Dandelion', t:'both', m:[4,5], mag:'minor', note:'First spring nectar at lower elevations.', w:'Taraxacum'},
+    {n:'Apple', t:'both', m:[4], mag:'minor', note:'Orchard bloom at lower elevations.', w:'Malus'},
+    {n:'Mesquite', t:'nectar', m:[4,5], mag:'minor', note:'Desert nectar in the low country of the southwest.', w:'Mesquite'},
+    {n:'Russian olive', t:'nectar', m:[5,6], mag:'major', note:'Fragrant nectar along western waterways.', w:'Elaeagnus angustifolia'},
+    {n:'Yellow sweetclover', t:'nectar', m:[6,7,8], mag:'major', note:'Roadside sweetclover yields heavily in the interior west.', w:'Melilotus officinalis'},
+    {n:'White sweetclover', t:'nectar', m:[6,7,8], mag:'major', note:'Tall white sweetclover, a western workhorse nectar.', w:'Melilotus albus'},
+    {n:'Alfalfa', t:'nectar', m:[6,7,8], mag:'major', note:'Irrigated alfalfa is a western workhorse nectar.', w:'Alfalfa'},
+    {n:'White clover', t:'nectar', m:[6,7,8], mag:'major', note:'Irrigated clover nectar in the valleys.', w:'Trifolium repens'},
+    {n:'Sunflower', t:'both', m:[7,8,9], mag:'minor', note:'Field nectar and abundant pollen.', w:'Helianthus'},
+    {n:'Rabbitbrush', t:'both', m:[8,9,10], mag:'major', note:'Late pungent western nectar that tops off the stores.', w:'Ericameria nauseosa'}
   ],
   PAC: [
-    {n:'Almond and fruit bloom', t:'both', m:[2,3], mag:'minor', note:'Pollination bloom rather than a surplus flow.'},
-    {n:'Mustard and wildflowers', t:'nectar', m:[2,3,4], mag:'major', note:'Early California valley and foothill nectar.'},
-    {n:'Manzanita and ceanothus', t:'nectar', m:[3,4], mag:'minor', note:'Chaparral nectar in the coast ranges.'},
-    {n:'Orange and citrus', t:'nectar', m:[3,4,5], mag:'major', note:'Orange blossom nectar where citrus grows.'},
-    {n:'Black sage and white sage', t:'nectar', m:[4,5,6], mag:'major', note:'Coveted California sage honey.'},
-    {n:'Blackberry', t:'nectar', m:[5,6,7], mag:'major', note:'Heavy reliable nectar in the Pacific Northwest.'},
-    {n:'Star thistle', t:'nectar', m:[6,7,8,9], mag:'major', note:'Prolific California summer nectar.'},
-    {n:'Fireweed', t:'nectar', m:[7,8], mag:'major', note:'Sought after mountain flow in the Northwest.'},
-    {n:'Goldenrod and aster', t:'both', m:[9,10], mag:'minor', note:'Light fall forage along the coast.'}
+    {n:'Almond', t:'both', m:[2,3], mag:'minor', note:'Pollination bloom rather than a surplus flow.', w:'Almond'},
+    {n:'Plum', t:'both', m:[2,3], mag:'minor', note:'Early orchard nectar and pollen.', w:'Plum'},
+    {n:'Wild mustard', t:'nectar', m:[2,3,4], mag:'major', note:'Early California valley and foothill nectar.', w:'Mustard plant'},
+    {n:'Wild radish', t:'nectar', m:[2,3,4], mag:'minor', note:'Pink and white roadside bloom alongside the mustard.', w:'Raphanus raphanistrum'},
+    {n:'Manzanita', t:'nectar', m:[2,3], mag:'minor', note:'Early chaparral bells with nectar in the coast ranges.', w:'Manzanita'},
+    {n:'Ceanothus', t:'nectar', m:[3,4], mag:'minor', note:'California lilac, chaparral nectar and pollen.', w:'Ceanothus'},
+    {n:'Citrus', t:'nectar', m:[3,4,5], mag:'major', note:'Orange blossom nectar where citrus grows.', w:'Citrus'},
+    {n:'Black sage', t:'nectar', m:[4,5,6], mag:'major', note:'Coveted California sage honey.', w:'Salvia mellifera'},
+    {n:'White sage', t:'nectar', m:[5,6], mag:'major', note:'Aromatic white sage, a premium coastal nectar.', w:'Salvia apiana'},
+    {n:'Blackberry', t:'nectar', m:[5,6,7], mag:'major', note:'Heavy reliable nectar in the Pacific Northwest.', w:'Blackberry'},
+    {n:'Star thistle', t:'nectar', m:[6,7,8,9], mag:'major', note:'Prolific California summer nectar.', w:'Centaurea solstitialis'},
+    {n:'Fireweed', t:'nectar', m:[7,8], mag:'major', note:'Sought after mountain flow in the Northwest.', w:'Chamaenerion angustifolium'},
+    {n:'Goldenrod', t:'both', m:[9,10], mag:'minor', note:'Light fall forage along the coast.', w:'Solidago'},
+    {n:'Aster', t:'both', m:[9,10], mag:'minor', note:'Late coastal nectar and pollen.', w:'Aster (genus)'}
   ]
 };
 
@@ -581,59 +607,40 @@ function zoneFor(state){ return STATE_ZONE[(state||'').toUpperCase()] || 'NE'; }
 
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-/* ---------- Wikipedia article per calendar plant (verified titles) ---------- */
-const WIKI = {
-  'Red maple and elm':'Acer rubrum',
-  'Henbit and dandelion':'Lamium amplexicaule',
-  'Fruit trees and redbud':'Cercis canadensis',
-  'Huajillo':'Senegalia berlandieri',
-  'White and crimson clover':'Clover',
-  'Mesquite':'Mesquite',
-  'Privet and ligustrum':'Ligustrum',
-  'Blackberry and dewberry':'Blackberry',
-  'Horsemint':'Monarda citriodora',
-  'Vitex':'Vitex agnus-castus',
-  'Cotton':'Cotton',
-  'Crepe myrtle':'Lagerstroemia',
-  'Goldenrod':'Solidago',
-  'Aster and broomweed':'Aster (genus)',
-  'Red maple':'Acer rubrum',
-  'Wild plum and fruit trees':'Prunus americana',
-  'Tulip poplar':'Liriodendron tulipifera',
-  'Black locust':'Robinia pseudoacacia',
-  'Clover and wildflowers':'Clover',
-  'Holly and gallberry':'Ilex glabra',
-  'Chinese tallow':'Triadica sebifera',
-  'Sumac':'Sumac',
-  'Sourwood':'Oxydendrum',
-  'Cotton and soybean':'Cotton',
-  'Aster':'Aster (genus)',
-  'Red and silver maple':'Acer rubrum',
-  'Dandelion':'Taraxacum',
-  'Fruit trees':'Malus',
-  'White and sweet clover':'Clover',
-  'Basswood and linden':'Tilia',
-  'Maple and willow':'Acer rubrum',
-  'Fruit and black locust':'Robinia pseudoacacia',
-  'White, sweet and alsike clover':'Clover',
-  'Alfalfa':'Alfalfa',
-  'Soybean':'Soybean',
-  'Willow and fruit trees':'Salix',
-  'Mesquite and desert bloom':'Mesquite',
-  'Russian olive':'Elaeagnus angustifolia',
-  'Yellow and white sweetclover':'Melilotus',
-  'Alfalfa and clover':'Alfalfa',
-  'Sunflower':'Helianthus',
-  'Rabbitbrush':'Ericameria nauseosa',
-  'Almond and fruit bloom':'Almond',
-  'Mustard and wildflowers':'Mustard plant',
-  'Manzanita and ceanothus':'Manzanita',
-  'Orange and citrus':'Orange blossom',
-  'Black sage and white sage':'Salvia mellifera',
-  'Star thistle':'Centaurea solstitialis',
-  'Fireweed':'Chamaenerion angustifolium',
-  'Goldenrod and aster':'Solidago'
-};
+/* ---------- latitude + GDD season shifting ---------- */
+/* Each zone's calendar is authored for its center latitude. A ZIP north of
+   that center runs later, south runs earlier (Hopkins' law, ~4 days/degree).
+   The season's actual growing degree days then nudge the window for a year
+   running hot or cold. Result: two ZIPs in one zone no longer match. */
+const ZONE_LAT = {SC:32, SE:33, NE:41, MW:42, MT:39, PAC:39};
+
+// rough expected season GDD (base 50F) by latitude and day of year, used only
+// as a baseline to judge whether this season is ahead of or behind normal
+function expectedSeasonGDD(lat, doy){
+  const annual = clamp(8940 - 143*lat, 800, 8000);
+  const frac = 1/(1+Math.exp(-0.025*(doy-196))); // share of annual heat banked by now
+  return annual * frac;
+}
+
+// returns {month, shift} where month is the effective bloom month (1-12)
+function effectiveMonth(M, lat, zone, seasonGDD, doy){
+  const ref = ZONE_LAT[zone] || 38;
+  let shift = clamp((ref - lat) * 3 / 30, -1.2, 1.2); // latitude, ~3 days/degree, in months
+  if(seasonGDD!=null){
+    const exp = expectedSeasonGDD(lat, doy);
+    if(exp>0){
+      // relative anomaly vs a rough normal, with a deadband so only a clearly
+      // hot or cold season nudges the window (the baseline is approximate)
+      const ra = (seasonGDD - exp) / exp;
+      const dead = 0.18;
+      if(Math.abs(ra) > dead) shift += clamp((Math.abs(ra)-dead) * 0.8 * Math.sign(ra), -0.35, 0.35);
+    }
+  }
+  shift = clamp(shift, -1.3, 1.3);
+  let m = Math.round(M + shift);
+  while(m<1) m+=12; while(m>12) m-=12;
+  return {month:m, shift};
+}
 
 /* ---------- helpers ---------- */
 function esc(s){
@@ -675,11 +682,15 @@ function foragingClass(curTemp, maxArr, precArr, todayIdx){
 
 /* ---------- bloom model ---------- */
 function runModel(ctx){
-  const {city, state, month:M, curTemp, rain30, seasonGDD, gdd30, forage} = ctx;
+  const {city, state, month:M, lat, doy, curTemp, rain30, seasonGDD, gdd30, forage} = ctx;
   const zone = zoneFor(state);
   const sources = CAL[zone];
 
-  const active = sources.filter(s=>s.m.includes(M));
+  // shift the bloom month for this ZIP's latitude and the season's heat
+  const em = effectiveMonth(M, lat, zone, seasonGDD, doy);
+  const EM = em.month;
+
+  const active = sources.filter(s=>s.m.includes(EM));
   const majorNow = active.filter(s=>isNectar(s.t) && s.mag==='major');
   const minorNow = active.filter(s=>isNectar(s.t) && s.mag==='minor');
   const n = majorNow.length;
@@ -695,8 +706,8 @@ function runModel(ctx){
 
   const verdict = score>=67?'flow' : score>=34?'transition':'dearth';
 
-  // next month major nectar count
-  const nextM = M===12?1:M+1;
+  // next month major nectar count (from the shifted month)
+  const nextM = EM===12?1:EM+1;
   const nextMajor = sources.filter(s=>s.m.includes(nextM) && isNectar(s.t) && s.mag==='major').length;
 
   let headline;
@@ -711,7 +722,7 @@ function runModel(ctx){
   const comingMap = new Map();
   const activeNames = new Set(active.map(s=>s.n));
   for(let k=1;k<=3;k++){
-    let mm = M+k; while(mm>12) mm-=12;
+    let mm = EM+k; while(mm>12) mm-=12;
     sources.forEach(s=>{
       if(s.m.includes(mm) && !activeNames.has(s.n)){
         // dedupe, keep earliest opening month within the scan window
@@ -756,7 +767,7 @@ function runModel(ctx){
   const caution = `This is a regional model. Forage shifts with elevation, local plantings, and a season running early or late. Your hive scale and frame checks are the final word for ${city}.`;
 
   return {zone,score,verdict,headline,summary,confidence,caution,bloomNow,coming,active,
-          seasonGDD,gdd30,rain30,forage,curTemp};
+          seasonGDD,gdd30,rain30,forage,curTemp,seasonShift:em.shift};
 }
 
 /* ---------- UI ---------- */
@@ -857,8 +868,10 @@ form.addEventListener('submit', async e=>{
 
     // 4. model
     setLoading(true,'Reading the regional bloom calendar...');
-    const month=new Date().getMonth()+1;
-    const result=runModel({city,state,month,curTemp,rain30,seasonGDD,gdd30,forage});
+    const now2=new Date();
+    const month=now2.getMonth()+1;
+    const doy=Math.floor((now2 - new Date(now2.getFullYear(),0,0))/86400000);
+    const result=runModel({city,state,month,lat,doy,curTemp,rain30,seasonGDD,gdd30,forage});
 
     render(city,state,result);
     setLoading(false);
@@ -958,7 +971,7 @@ function render(city,state,r){
   if(r.bloomNow.length){
     nowHTML=r.bloomNow.map(s=>{
       const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
-      const wt=WIKI[s.n]||'';
+      const wt=s.w||'';
       return `<div class="plant${wt?' has-wiki':''}"${wt?` data-wiki="${esc(wt)}" tabindex="0" role="button" aria-expanded="false"`:''}>
         <div class="prow">
           <span class="pname">${esc(s.n)}</span>
@@ -981,7 +994,7 @@ function render(city,state,r){
       const s=c.s;
       const win=MONTHS[c.openMonth-1];
       const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
-      const wt=WIKI[s.n]||'';
+      const wt=s.w||'';
       return `<div class="plant${wt?' has-wiki':''}"${wt?` data-wiki="${esc(wt)}" tabindex="0" role="button" aria-expanded="false"`:''}>
         <div class="prow">
           <span class="pname">${esc(s.n)}</span>
@@ -996,6 +1009,12 @@ function render(city,state,r){
   } else {
     comeHTML=`<div class="empty">No major sources are opening in the next few weeks for your area.</div>`;
   }
+
+  // season-shift note: only when the latitude + GDD offset is at least about a week
+  const shiftWeeks=Math.round(Math.abs(r.seasonShift||0)*4.345);
+  const shiftNote = shiftWeeks>=1
+    ? `Bloom timing is set about ${shiftWeeks} week${shiftWeeks>1?'s':''} ${r.seasonShift>0?'earlier':'later'} than the regional baseline, for your latitude and this season's heat.`
+    : '';
 
   resultsEl.innerHTML=`
     <div class="placeline">
@@ -1050,6 +1069,7 @@ function render(city,state,r){
     <div class="foot">
       <div class="conf">Confidence <b>${esc(r.confidence)}</b> · flow score ${r.score} / 100</div>
       <p class="caution">${esc(r.caution)}</p>
+      ${shiftNote?`<p class="caution" style="margin-top:8px">${esc(shiftNote)}</p>`:''}
     </div>
 
     <div class="credit">
