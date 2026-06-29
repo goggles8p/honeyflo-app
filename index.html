@@ -648,6 +648,119 @@ const CAL = {
   ]
 };
 
+/* ---------- bee-forage knowledge, keyed by plant genus ----------
+   iNaturalist tells us which plants grow at a ZIP's coordinates; this table
+   says which of those are bee forage and when they bloom. Months are a typical
+   window, then shifted for the ZIP's latitude and the season's heat. */
+const FORAGE = {
+  // trees
+  Acer:{t:'both',m:[3,4],mag:'minor',note:'Early maple pollen with a little nectar that wakes the colony.'},
+  Salix:{t:'both',m:[3,4],mag:'minor',note:'Willow pollen and light nectar along streams.'},
+  Ulmus:{t:'pollen',m:[2,3],mag:'minor',note:'Wind borne elm pollen on warm late winter days.'},
+  Populus:{t:'pollen',m:[3,4],mag:'minor',note:'Cottonwood and poplar pollen, and propolis resin.'},
+  Liriodendron:{t:'nectar',m:[4,5,6],mag:'major',note:'Tulip poplar, a big early nectar of the eastern woods.'},
+  Robinia:{t:'nectar',m:[4,5],mag:'major',note:'Black locust, intense but brief late spring nectar.'},
+  Gleditsia:{t:'nectar',m:[5,6],mag:'minor',note:'Honey locust, light early summer nectar.'},
+  Tilia:{t:'nectar',m:[6,7],mag:'major',note:'Basswood and linden, a strong brief midsummer flow.'},
+  Prunus:{t:'both',m:[3,4],mag:'minor',note:'Plum, cherry and peach bloom, early nectar and pollen.'},
+  Malus:{t:'both',m:[4,5],mag:'minor',note:'Apple and crabapple, orchard nectar and strong pollen.'},
+  Pyrus:{t:'both',m:[3,4],mag:'minor',note:'Pear bloom, early nectar and pollen.'},
+  Oxydendrum:{t:'nectar',m:[6,7],mag:'major',note:'Sourwood, prized mountain nectar in the southeast.'},
+  Nyssa:{t:'nectar',m:[4,5],mag:'major',note:'Tupelo, premier swamp nectar in the deep south.'},
+  Ilex:{t:'nectar',m:[4,5],mag:'major',note:'Holly and gallberry, light coastal plain honey.'},
+  Triadica:{t:'nectar',m:[5,6],mag:'major',note:'Chinese tallow, a heavy early summer Gulf coast flow.'},
+  Elaeagnus:{t:'nectar',m:[5,6],mag:'major',note:'Russian and autumn olive, fragrant waterway nectar.'},
+  Cercis:{t:'both',m:[3,4],mag:'minor',note:'Redbud, pink spring blossoms with light nectar and pollen.'},
+  Citrus:{t:'nectar',m:[3,4,5],mag:'major',note:'Orange blossom nectar where citrus grows.'},
+  Lagerstroemia:{t:'pollen',m:[6,7,8],mag:'minor',note:'Crepe myrtle, summer pollen with little nectar.'},
+  Quercus:{t:'pollen',m:[3,4],mag:'minor',note:'Oak catkin pollen for early spring brood.'},
+  Castanea:{t:'both',m:[6],mag:'minor',note:'Chestnut, pungent early summer nectar and pollen.'},
+  Aesculus:{t:'both',m:[4,5],mag:'minor',note:'Buckeye and horse chestnut, spring nectar and pollen.'},
+  Catalpa:{t:'nectar',m:[5,6],mag:'minor',note:'Catalpa, showy early summer nectar.'},
+  Vitex:{t:'both',m:[5,6,7],mag:'minor',note:'Chaste tree, dependable urban nectar and pollen.'},
+  Eucalyptus:{t:'nectar',m:[11,12,1,2],mag:'minor',note:'Winter and spring nectar in California.'},
+  Ailanthus:{t:'nectar',m:[5,6],mag:'minor',note:'Tree of heaven, strong but rank early summer nectar.'},
+  Tamarix:{t:'nectar',m:[5,6,7,8],mag:'minor',note:'Saltcedar, long summer nectar along western water.'},
+  Prosopis:{t:'nectar',m:[4,5],mag:'major',note:'Mesquite, heavy spring nectar in the southwest.'},
+  Senegalia:{t:'nectar',m:[3,4],mag:'major',note:'Huajillo and acacia, premier brush country nectar.'},
+  Acacia:{t:'nectar',m:[3,4],mag:'major',note:'Acacia, early southwestern nectar.'},
+  Chilopsis:{t:'nectar',m:[5,6,7],mag:'minor',note:'Desert willow, nectar along southwestern washes.'},
+  Ligustrum:{t:'nectar',m:[4,5],mag:'major',note:'Privet, strong fencerow and urban nectar in late spring.'},
+  // shrubs
+  Eriogonum:{t:'nectar',m:[5,6,7,8,9],mag:'major',note:'Wild buckwheat, a premier western chaparral and desert nectar.'},
+  Salvia:{t:'nectar',m:[4,5,6],mag:'major',note:'Sages yield coveted aromatic honey in the west.'},
+  Adenostoma:{t:'nectar',m:[5,6],mag:'minor',note:'Chamise and redshanks, steady chaparral nectar.'},
+  Rhus:{t:'nectar',m:[4,5,6],mag:'minor',note:'Sumac and sugar bush, reliable nectar.'},
+  Eriodictyon:{t:'nectar',m:[5,6],mag:'minor',note:'Yerba santa, fragrant chaparral nectar.'},
+  Arctostaphylos:{t:'nectar',m:[2,3],mag:'minor',note:'Manzanita, early chaparral bells with nectar.'},
+  Ceanothus:{t:'nectar',m:[3,4,5],mag:'minor',note:'California lilac, chaparral nectar and pollen.'},
+  Encelia:{t:'both',m:[3,4],mag:'minor',note:'Brittlebush, early desert pollen and nectar.'},
+  Larrea:{t:'both',m:[4,5],mag:'minor',note:'Creosote bush, desert nectar and pollen after rain.'},
+  Sphaeralcea:{t:'both',m:[4,5,6],mag:'minor',note:'Globemallow, orange desert bloom for nectar and pollen.'},
+  Baccharis:{t:'both',m:[9,10,11],mag:'minor',note:'Coyote brush, late fall nectar and pollen in the west.'},
+  Ericameria:{t:'both',m:[8,9,10],mag:'major',note:'Rabbitbrush, late pungent western nectar that tops off stores.'},
+  Chrysothamnus:{t:'both',m:[8,9,10],mag:'major',note:'Rabbitbrush, heavy late western nectar and pollen.'},
+  Rubus:{t:'both',m:[4,5,6],mag:'major',note:'Blackberry and raspberry, heavy reliable bramble nectar.'},
+  Vaccinium:{t:'nectar',m:[3,4,5],mag:'minor',note:'Blueberry and huckleberry, spring nectar.'},
+  Cornus:{t:'both',m:[4,5],mag:'minor',note:'Dogwood, spring nectar and pollen.'},
+  Ribes:{t:'both',m:[3,4],mag:'minor',note:'Currant and gooseberry, early spring forage.'},
+  Cephalanthus:{t:'nectar',m:[6,7],mag:'minor',note:'Buttonbush, wetland summer nectar.'},
+  Lonicera:{t:'nectar',m:[5,6],mag:'minor',note:'Honeysuckle, late spring nectar.'},
+  Toxicodendron:{t:'nectar',m:[4,5],mag:'minor',note:'Poison oak and ivy, a surprising light nectar source.'},
+  // forbs and crops
+  Trifolium:{t:'nectar',m:[4,5,6,7],mag:'major',note:'Clover, a backbone nectar across pastures and lawns.'},
+  Melilotus:{t:'nectar',m:[6,7,8],mag:'major',note:'Sweetclover, tall roadside legume with heavy summer nectar.'},
+  Medicago:{t:'nectar',m:[6,7,8],mag:'major',note:'Alfalfa, heavy nectar where it is grown for hay or seed.'},
+  Vicia:{t:'nectar',m:[3,4,5],mag:'minor',note:'Vetch, roadside legume nectar through spring.'},
+  Helianthus:{t:'both',m:[7,8,9],mag:'minor',note:'Sunflower, field nectar and abundant pollen.'},
+  Solidago:{t:'both',m:[8,9,10],mag:'major',note:'Goldenrod, the main fall flow that builds winter stores.'},
+  Symphyotrichum:{t:'both',m:[9,10,11],mag:'major',note:'Aster, late nectar and pollen for the winter bees.'},
+  Aster:{t:'both',m:[9,10,11],mag:'major',note:'Aster, late season nectar and pollen.'},
+  Brassica:{t:'nectar',m:[2,3,4],mag:'major',note:'Wild mustard, early valley and foothill nectar.'},
+  Sinapis:{t:'nectar',m:[2,3,4],mag:'major',note:'Mustard, early broad spring nectar.'},
+  Raphanus:{t:'nectar',m:[2,3,4],mag:'minor',note:'Wild radish, roadside bloom alongside the mustard.'},
+  Taraxacum:{t:'both',m:[3,4,5],mag:'minor',note:'Dandelion, first broad nectar and pollen of spring.'},
+  Lamium:{t:'pollen',m:[2,3,4],mag:'minor',note:'Henbit and deadnettle, low ground pollen for early brood.'},
+  Monarda:{t:'nectar',m:[5,6,7],mag:'major',note:'Beebalm and horsemint, aromatic prairie nectar.'},
+  Asclepias:{t:'nectar',m:[6,7,8],mag:'minor',note:'Milkweed, summer nectar for many pollinators.'},
+  Gossypium:{t:'nectar',m:[6,7,8],mag:'minor',note:'Cotton, field nectar where it is grown nearby.'},
+  Glycine:{t:'nectar',m:[7,8],mag:'minor',note:'Soybean, field nectar in good years.'},
+  Fagopyrum:{t:'nectar',m:[7,8],mag:'minor',note:'Buckwheat, dark strong summer nectar.'},
+  Centaurea:{t:'nectar',m:[6,7,8,9],mag:'major',note:'Star thistle and knapweed, prolific summer nectar in the west.'},
+  Chamaenerion:{t:'nectar',m:[7,8],mag:'major',note:'Fireweed, a sought after mountain flow in the northwest.'},
+  Epilobium:{t:'nectar',m:[7,8],mag:'major',note:'Willowherb and fireweed, mountain summer nectar.'},
+  Phacelia:{t:'nectar',m:[4,5,6],mag:'major',note:'Phacelia, one of the richest wild nectar plants.'},
+  Lavandula:{t:'nectar',m:[6,7],mag:'minor',note:'Lavender, fragrant garden nectar.'},
+  Borago:{t:'nectar',m:[6,7,8],mag:'minor',note:'Borage, a steady refilling garden nectar.'},
+  Eschscholzia:{t:'pollen',m:[3,4,5],mag:'minor',note:'California poppy, abundant spring pollen.'},
+  Cucurbita:{t:'both',m:[7,8],mag:'minor',note:'Squash and pumpkin, big morning nectar and pollen.'},
+  Reynoutria:{t:'both',m:[9,10],mag:'minor',note:'Knotweed, late nectar from invasive thickets.'},
+  Persicaria:{t:'both',m:[8,9],mag:'minor',note:'Smartweed, late summer wetland nectar and pollen.'},
+  Amphiachyris:{t:'both',m:[9,10],mag:'minor',note:'Broomweed, yellow fall bloom alongside goldenrod.'},
+  Grindelia:{t:'both',m:[7,8,9],mag:'minor',note:'Gumweed, resinous late summer nectar and pollen.'},
+  Agastache:{t:'nectar',m:[6,7,8],mag:'minor',note:'Hyssop, long blooming summer nectar.'},
+  Cirsium:{t:'nectar',m:[6,7,8],mag:'minor',note:'Native thistle, good summer nectar.'},
+  Verbena:{t:'nectar',m:[5,6,7],mag:'minor',note:'Vervain, steady warm season nectar.'},
+  Penstemon:{t:'nectar',m:[5,6],mag:'minor',note:'Penstemon, western wildflower nectar.'},
+  Wisteria:{t:'nectar',m:[4,5],mag:'minor',note:'Wisteria, fragrant spring nectar.'},
+  Lotus:{t:'nectar',m:[4,5,6],mag:'minor',note:'Deervetch and trefoil, low legume nectar.'},
+  Crataegus:{t:'both',m:[4,5],mag:'minor',note:'Hawthorn, hedgerow nectar and pollen.'}
+};
+function genusOf(sci){ return (sci||'').split(' ')[0]; }
+function capFirst(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+// build a bloom-source list from iNaturalist species (already ranked by local abundance)
+function buildLocalForage(species){
+  const out=[], seen=new Set();
+  for(const sp of (species||[])){
+    const g=genusOf(sp.sci);
+    const f=FORAGE[g];
+    if(!f || seen.has(g)) continue;
+    seen.add(g);
+    out.push({n:capFirst(sp.common||sp.sci), t:f.t, m:f.m, mag:f.mag, note:f.note, w:sp.sci});
+  }
+  return out;
+}
+
 const REGION = {
   SE:'FL GA SC NC AL MS LA TN AR KY',
   NE:'VA WV MD DE PA NJ NY CT RI MA VT NH ME OH MI IN',
@@ -702,8 +815,8 @@ function effectiveMonth(M, lat, zone, seasonGDD, doy){
 
 /* ---------- estimated honey harvest window ---------- */
 function fmtMD(d){ return MONTHS[d.getMonth()]+' '+d.getDate(); }
-function harvestWindow(zone, shift, now){
-  const majors = (CAL[zone]||[]).filter(s=>isNectar(s.t) && s.mag==='major');
+function harvestWindow(sources, shift, now){
+  const majors = (sources||[]).filter(s=>isNectar(s.t) && s.mag==='major');
   // main surplus flow runs spring into midsummer; the fall goldenrod (8+) is left for the bees
   const summer = majors.flatMap(s=>s.m).filter(m=>m>=3 && m<=7);
   if(!summer.length) return null;
@@ -761,9 +874,11 @@ function foragingClass(curTemp, maxArr, precArr, todayIdx){
 
 /* ---------- bloom model ---------- */
 function runModel(ctx){
-  const {city, state, month:M, lat, doy, curTemp, rain30, seasonGDD, gdd30, forage} = ctx;
+  const {city, state, month:M, lat, doy, curTemp, rain30, seasonGDD, gdd30, forage, localForage} = ctx;
   const zone = zoneFor(state);
-  const sources = CAL[zone];
+  // prefer plants observed near this ZIP (iNaturalist); fall back to the regional calendar
+  const localUsed = !!(localForage && localForage.length>=3);
+  const sources = localUsed ? localForage : CAL[zone];
 
   // shift the bloom month for this ZIP's latitude and the season's heat
   const em = effectiveMonth(M, lat, zone, seasonGDD, doy);
@@ -845,8 +960,10 @@ function runModel(ctx){
   const confidence = (score>76||score<24)?'high':'moderate';
   const caution = `This is a regional model. Forage shifts with elevation, local plantings, and a season running early or late. Your hive scale and frame checks are the final word for ${city}.`;
 
+  const harvest = harvestWindow(sources, em.shift, new Date());
+
   return {zone,score,verdict,headline,summary,confidence,caution,bloomNow,coming,active,
-          seasonGDD,gdd30,rain30,forage,curTemp,seasonShift:em.shift};
+          seasonGDD,gdd30,rain30,forage,curTemp,seasonShift:em.shift,harvest,localUsed};
 }
 
 /* ---------- UI ---------- */
@@ -945,12 +1062,27 @@ form.addEventListener('submit', async e=>{
       seasonGDD=round(s);
     }catch(err){ seasonGDD=null; }
 
+    // 3b. plants actually observed near this ZIP (iNaturalist, ranked by abundance)
+    setLoading(true,'Checking what grows near you...');
+    let localForage=[];
+    try{
+      const iUrl=`https://api.inaturalist.org/v1/observations/species_counts`+
+        `?lat=${lat}&lng=${lon}&radius=50&iconic_taxa=Plantae&quality_grade=research&per_page=200`;
+      const idata=await fetchJSON(iUrl);
+      const species=(idata.results||[]).map(x=>({
+        sci:x.taxon&&x.taxon.name,
+        common:x.taxon&&x.taxon.preferred_common_name,
+        count:x.count
+      }));
+      localForage=buildLocalForage(species);
+    }catch(e){ localForage=[]; }
+
     // 4. model
-    setLoading(true,'Reading the regional bloom calendar...');
+    setLoading(true,'Matching local plants to the bloom calendar...');
     const now2=new Date();
     const month=now2.getMonth()+1;
     const doy=Math.floor((now2 - new Date(now2.getFullYear(),0,0))/86400000);
-    const result=runModel({city,state,month,lat,doy,curTemp,rain30,seasonGDD,gdd30,forage});
+    const result=runModel({city,state,month,lat,doy,curTemp,rain30,seasonGDD,gdd30,forage,localForage});
 
     render(city,state,result);
     setLoading(false);
@@ -1105,7 +1237,7 @@ function render(city,state,r){
     : '';
 
   // estimated honey harvest window for this ZIP
-  const harvest = harvestWindow(r.zone, r.seasonShift||0, new Date());
+  const harvest = r.harvest;
   const harvestHTML = harvest ? `
     <div class="harvest">
       <div class="hlabel">Estimated honey harvest</div>
@@ -1175,6 +1307,7 @@ function render(city,state,r){
       <div class="conf">Confidence <b>${esc(r.confidence)}</b> · flow score ${r.score} / 100</div>
       <p class="caution">${esc(r.caution)}</p>
       ${shiftNote?`<p class="caution" style="margin-top:8px">${esc(shiftNote)}</p>`:''}
+      <p class="caution" style="margin-top:8px">${r.localUsed?'Plant list matched to species recorded near your location.':'Plant list from the regional calendar, local records were unavailable.'}</p>
     </div>
 
   `;
