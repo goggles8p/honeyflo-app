@@ -381,6 +381,37 @@ a{color:var(--amber-soft)}
 .pnote{color:var(--muted);font-size:13px;margin-top:5px;line-height:1.4}
 .empty{color:var(--muted);font-size:14px;padding:6px 0 16px;line-height:1.5}
 
+/* honey harvest panel */
+.harvest{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-left:3px solid var(--amber);
+  border-radius:14px;
+  padding:18px;
+  margin-top:18px;
+}
+.harvest .hlabel{
+  font-family:var(--data);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.harvest .hdate{
+  font-family:var(--display);
+  font-weight:500;
+  font-size:24px;
+  margin:8px 0 3px;
+  color:var(--amber-soft);
+}
+.harvest .hstatus{
+  font-family:var(--data);
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:9px;
+}
+.harvest .hnote{color:var(--muted);font-size:12.5px;line-height:1.5}
+
 /* clickable plant rows + wiki panel */
 .plant.has-wiki{cursor:pointer}
 .chev{
@@ -667,6 +698,27 @@ function effectiveMonth(M, lat, zone, seasonGDD, doy){
   let m = Math.round(M + shift);
   while(m<1) m+=12; while(m>12) m-=12;
   return {month:m, shift};
+}
+
+/* ---------- estimated honey harvest window ---------- */
+function fmtMD(d){ return MONTHS[d.getMonth()]+' '+d.getDate(); }
+function harvestWindow(zone, shift, now){
+  const majors = (CAL[zone]||[]).filter(s=>isNectar(s.t) && s.mag==='major');
+  // main surplus flow runs spring into midsummer; the fall goldenrod (8+) is left for the bees
+  const summer = majors.flatMap(s=>s.m).filter(m=>m>=3 && m<=7);
+  if(!summer.length) return null;
+  const baseEnd = Math.max(...summer);
+  const MS=86400000, year=now.getFullYear();
+  // last day of the baseline end month, moved into this ZIP's real calendar
+  const flowEnd = new Date(year, baseEnd, 0).getTime() - shift*30.44*MS;
+  const target = flowEnd + 10*MS;          // about 10 days for capping and curing
+  const lo = target - 12*MS, hi = target + 16*MS;
+  const t = now.getTime();
+  let status;
+  if(t>hi) status='This season’s window has passed.';
+  else if(t<lo){ const w=Math.max(1,Math.round((lo-t)/(7*MS))); status='About '+w+' week'+(w!==1?'s':'')+' away.'; }
+  else status='You are in the window now.';
+  return {target:new Date(target), lo:new Date(lo), hi:new Date(hi), status};
 }
 
 /* ---------- helpers ---------- */
@@ -1052,6 +1104,16 @@ function render(city,state,r){
     ? `Bloom timing is set about ${shiftWeeks} week${shiftWeeks>1?'s':''} ${r.seasonShift>0?'earlier':'later'} than the regional baseline, for your latitude and this season's heat.`
     : '';
 
+  // estimated honey harvest window for this ZIP
+  const harvest = harvestWindow(r.zone, r.seasonShift||0, new Date());
+  const harvestHTML = harvest ? `
+    <div class="harvest">
+      <div class="hlabel">Estimated honey harvest</div>
+      <div class="hdate">Around ${esc(fmtMD(harvest.target))}</div>
+      <div class="hstatus">Window ${esc(fmtMD(harvest.lo))} to ${esc(fmtMD(harvest.hi))} · ${esc(harvest.status)}</div>
+      <div class="hnote">Pull supers after the main flow ends and the honey is capped, before the fall goldenrod comes in. Leave the fall goldenrod and aster as the bees' winter stores. This is an estimate from your regional flow and local timing, so always confirm the frames are capped before you harvest.</div>
+    </div>` : '';
+
   resultsEl.innerHTML=`
     <div class="placeline">
       <span class="city">${esc(city)}, ${esc(state)}</span>
@@ -1106,6 +1168,8 @@ function render(city,state,r){
         ${comeHTML}
       </div>
     </div>
+
+    ${harvestHTML}
 
     <div class="foot">
       <div class="conf">Confidence <b>${esc(r.confidence)}</b> · flow score ${r.score} / 100</div>
