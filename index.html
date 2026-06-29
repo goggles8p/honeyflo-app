@@ -302,6 +302,33 @@ a{color:var(--amber-soft)}
   font-size:12.5px;
   line-height:1.4;
 }
+.ibtn{
+  margin-left:auto;
+  width:18px;height:18px;
+  flex:0 0 auto;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--muted);
+  font-family:var(--data);
+  font-size:11px;
+  font-style:italic;
+  line-height:1;
+  cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:color .15s, border-color .15s;
+}
+.ibtn:hover{color:var(--amber);border-color:var(--amber)}
+.ibtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tinfo{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed var(--line-soft);
+  font-size:12.5px;
+  color:var(--muted);
+  line-height:1.5;
+}
+.tinfo b{color:var(--amber-soft);font-weight:500}
 
 /* bloom columns */
 .blooms{
@@ -927,6 +954,15 @@ function togglePlant(plant){
 }
 resultsEl.addEventListener('click', e=>{
   if(e.target.closest('a')) return;        // let links work
+  // info button on a metric tile
+  const ib=e.target.closest('.ibtn');
+  if(ib){
+    const info=ib.closest('.tile').querySelector('.tinfo');
+    const open=info.hidden;
+    info.hidden=!open;
+    ib.setAttribute('aria-expanded', open?'true':'false');
+    return;
+  }
   if(e.target.closest('.wiki')) return;    // ignore clicks inside an open panel
   const plant=e.target.closest('.plant.has-wiki');
   if(plant) togglePlant(plant);
@@ -1049,9 +1085,14 @@ function render(city,state,r){
         <div class="tsub">${esc(rainCopy)}</div>
       </div>
       <div class="tile">
-        <div class="tlabel">Growing degree days</div>
+        <div class="tlabel">Growing degree days
+          <button class="ibtn" type="button" aria-label="What are growing degree days?" aria-expanded="false">i</button>
+        </div>
         <div class="tnum">${gddNum}</div>
         <div class="tsub">${esc(gddCopy)}</div>
+        <div class="tinfo" hidden>
+          <b>Plants count warmth, not days.</b> On warm days they bank a little heat, like coins in a piggy bank. On cold days they bank almost none. When enough adds up, they bloom. This number is the heat banked so far, so a bigger number means blooms are closer. It is why a warm spring brings flowers early and a cold spring runs late.
+        </div>
       </div>
     </div>
 
