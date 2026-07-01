@@ -492,6 +492,36 @@ a{color:var(--amber-soft)}
   .tiles{grid-template-columns:1fr}
   .blooms{grid-template-columns:1fr}
 }
+/* feedback button + modal */
+.fbbtn{
+  position:fixed; right:16px; bottom:16px; z-index:50;
+  font-family:var(--data); font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+  color:#1a1206; background:var(--amber); border:none; border-radius:22px;
+  padding:11px 18px; cursor:pointer; font-weight:500;
+  box-shadow:0 4px 14px rgba(0,0,0,.45);
+  transition:background .15s;
+}
+.fbbtn:hover{background:#ffba3e}
+.fbmodal{
+  position:fixed; inset:0; z-index:60;
+  background:rgba(6,10,8,.74);
+  display:flex; align-items:center; justify-content:center; padding:16px;
+}
+.fbmodal[hidden]{display:none}
+.fbcard{
+  background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  width:100%; max-width:540px; max-height:92vh;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.fbhead{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; border-bottom:1px solid var(--line-soft);
+}
+.fbhead h2{font-family:var(--display); font-weight:500; font-size:18px; margin:0}
+.fbclose{background:transparent; border:none; color:var(--muted); font-size:24px; line-height:1; cursor:pointer}
+.fbclose:hover{color:var(--ink)}
+.fbframe{border:none; width:100%; height:74vh; background:#fff}
+
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important; transition:none !important}
 }
@@ -519,6 +549,17 @@ a{color:var(--amber-soft)}
   <div class="error" id="error" role="alert"></div>
 
   <section class="results" id="results" aria-live="polite"></section>
+</div>
+
+<button class="fbbtn" id="fbBtn" type="button">Feedback</button>
+<div class="fbmodal" id="fbModal" hidden>
+  <div class="fbcard">
+    <div class="fbhead">
+      <h2>Send feedback</h2>
+      <button class="fbclose" id="fbClose" type="button" aria-label="Close">&times;</button>
+    </div>
+    <iframe class="fbframe" id="fbFrame" title="HoneyFlo feedback form" data-src="https://form.jotform.com/261815706397062" loading="lazy"></iframe>
+  </div>
 </div>
 
 <script>
@@ -975,6 +1016,19 @@ zipIn.addEventListener('input',()=>{
   zipIn.value=zipIn.value.replace(/\D/g,'').slice(0,5);
 });
 
+/* ---------- feedback modal ---------- */
+const fbBtn=$('fbBtn'), fbModal=$('fbModal'), fbClose=$('fbClose'), fbFrame=$('fbFrame');
+function openFb(){
+  if(!fbFrame.src) fbFrame.src=fbFrame.dataset.src;   // lazy-load the form on first open
+  fbModal.hidden=false;
+  track('feedback-open','Feedback opened');
+}
+function closeFb(){ fbModal.hidden=true; }
+fbBtn.addEventListener('click', openFb);
+fbClose.addEventListener('click', closeFb);
+fbModal.addEventListener('click', e=>{ if(e.target===fbModal) closeFb(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !fbModal.hidden) closeFb(); });
+
 function showError(msg){
   errorEl.textContent=msg;
   errorEl.classList.add('on');
@@ -1285,7 +1339,7 @@ function render(city,state,r){
         <div class="tnum">${gddNum}</div>
         <div class="tsub">${esc(gddCopy)}</div>
         <div class="tinfo" hidden>
-          <b>Plants count warmth, not days.</b> On warm days they bank a little heat, like coins in a piggy bank. On cold days they bank almost none. When enough adds up, they bloom. This number is the heat banked so far, so a bigger number means blooms are closer. It is why a warm spring brings flowers early and a cold spring runs late.
+          <b>A running total of warmth.</b> Each day adds up how far the temperature climbed above 50°F, the point where most plants start growing. Warm days add a lot, cool days add a little, cold days add nothing. Plants bloom once enough total warmth has built up, so a higher number means the season is further along and blooms are closer. It is why a warm spring flowers early and a cold one runs late.
         </div>
       </div>
     </div>
