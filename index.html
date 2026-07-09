@@ -915,7 +915,8 @@ function foragingClass(curTemp, maxArr, precArr, todayIdx){
 
 /* ---------- bloom model ---------- */
 function runModel(ctx){
-  const {city, state, month:M, lat, doy, curTemp, rain30, seasonGDD, gdd30, forage, localForage} = ctx;
+  const {city, state, month:M, lat, doy, curTemp, rain30, seasonGDD, gdd30, forage,
+         localForage, floweringNow, floweringSoon} = ctx;
   const zone = zoneFor(state);
   // prefer plants observed near this ZIP (iNaturalist); fall back to the regional calendar
   const localUsed = !!(localForage && localForage.length>=3);
@@ -925,7 +926,21 @@ function runModel(ctx){
   const em = effectiveMonth(M, lat, zone, seasonGDD, doy);
   const EM = em.month;
 
-  const active = sources.filter(s=>s.m.includes(EM));
+  // "blooming now" from real iNaturalist flowering records when we have enough of them,
+  // otherwise from the shifted calendar. This is what fixes wrong-season plants.
+  const nowSet = new Set(floweringNow||[]);
+  const soonSet = new Set(floweringSoon||[]);
+  let realBloom=false, active, comingSources=null;
+  if(localUsed && nowSet.size>0){
+    const flActive = sources.filter(s=> s.w && nowSet.has(s.w));
+    if(flActive.length>=2){
+      realBloom = true;
+      active = flActive;
+      comingSources = sources.filter(s=> s.w && soonSet.has(s.w) && !nowSet.has(s.w));
+    }
+  }
+  if(!realBloom) active = sources.filter(s=>s.m.includes(EM));
+
   const majorNow = active.filter(s=>isNectar(s.t) && s.mag==='major');
   const minorNow = active.filter(s=>isNectar(s.t) && s.mag==='minor');
   const n = majorNow.length;
@@ -941,9 +956,14 @@ function runModel(ctx){
 
   const verdict = score>=67?'flow' : score>=34?'transition':'dearth';
 
-  // next month major nectar count (from the shifted month)
-  const nextM = EM===12?1:EM+1;
-  const nextMajor = sources.filter(s=>s.m.includes(nextM) && isNectar(s.t) && s.mag==='major').length;
+  // next major nectar count: from flowering-soon records when we have them, else the shifted calendar
+  let nextMajor;
+  if(realBloom){
+    nextMajor = comingSources.filter(s=>isNectar(s.t) && s.mag==='major').length;
+  } else {
+    const nextM = EM===12?1:EM+1;
+    nextMajor = sources.filter(s=>s.m.includes(nextM) && isNectar(s.t) && s.mag==='major').length;
+  }
 
   let headline;
   if(verdict==='flow') headline='Flow on';
@@ -953,22 +973,24 @@ function runModel(ctx){
   // blooming now: major before minor, cap 5
   const bloomNow = active.slice().sort((a,b)=>(a.mag==='major'?0:1)-(b.mag==='major'?0:1)).slice(0,5);
 
-  // coming up
-  const comingMap = new Map();
-  const activeNames = new Set(active.map(s=>s.n));
-  for(let k=1;k<=3;k++){
-    let mm = EM+k; while(mm>12) mm-=12;
-    sources.forEach(s=>{
-      if(s.m.includes(mm) && !activeNames.has(s.n)){
-        // dedupe, keep earliest opening month within the scan window
-        const existing = comingMap.get(s.n);
-        if(!existing || k<existing.k){
-          comingMap.set(s.n, {s, k, openMonth:mm});
+  // coming up: from flowering-soon records when we have them, else the shifted calendar
+  let coming;
+  if(realBloom){
+    coming = comingSources.map(s=>({s, k:1, openMonth:null}));
+  } else {
+    const comingMap = new Map();
+    const activeNames = new Set(active.map(s=>s.n));
+    for(let k=1;k<=3;k++){
+      let mm = EM+k; while(mm>12) mm-=12;
+      sources.forEach(s=>{
+        if(s.m.includes(mm) && !activeNames.has(s.n)){
+          const existing = comingMap.get(s.n);
+          if(!existing || k<existing.k){ comingMap.set(s.n, {s, k, openMonth:mm}); }
         }
-      }
-    });
+      });
+    }
+    coming = Array.from(comingMap.values());
   }
-  let coming = Array.from(comingMap.values());
   // drop minor pollen-only sources
   coming = coming.filter(c=> !(c.s.mag==='minor' && c.s.t==='pollen'));
   coming.sort((a,b)=>{
@@ -1003,8 +1025,10 @@ function runModel(ctx){
 
   const harvest = harvestWindow(sources, em.shift, new Date());
 
+  const bloomSource = realBloom ? 'flowering' : (localUsed ? 'localcalendar' : 'regional');
+
   return {zone,score,verdict,headline,summary,confidence,caution,bloomNow,coming,active,
-          seasonGDD,gdd30,rain30,forage,curTemp,seasonShift:em.shift,harvest,localUsed};
+          seasonGDD,gdd30,rain30,forage,curTemp,seasonShift:em.shift,harvest,localUsed,realBloom,bloomSource};
 }
 
 /* ---------- UI ---------- */
@@ -1044,6 +1068,21 @@ async function fetchJSON(url){
   const r=await fetch(url);
   if(!r.ok){ const e=new Error('http'); e.status=r.status; throw e; }
   return r.json();
+}
+
+/* iNaturalist: which plants grow near a point, and which are actually in flower */
+async function iNatSpecies(lat,lon,radius){
+  const u=`https://api.inaturalist.org/v1/observations/species_counts`+
+    `?lat=${lat}&lng=${lon}&radius=${radius}&iconic_taxa=Plantae&quality_grade=research&per_page=200`;
+  const d=await fetchJSON(u);
+  return (d.results||[]).map(r=>({sci:r.taxon&&r.taxon.name, common:r.taxon&&r.taxon.preferred_common_name, count:r.count}));
+}
+async function iNatFlowering(lat,lon,radius,months){
+  // term_id 12 = Plant Phenology, term_value_id 13 = Flowering; month accepts a comma list
+  const u=`https://api.inaturalist.org/v1/observations/species_counts`+
+    `?lat=${lat}&lng=${lon}&radius=${radius}&iconic_taxa=Plantae&term_id=12&term_value_id=13&month=${months}&per_page=200`;
+  const d=await fetchJSON(u);
+  return (d.results||[]).map(r=>r.taxon&&r.taxon.name).filter(Boolean);
 }
 
 form.addEventListener('submit', async e=>{
@@ -1116,33 +1155,34 @@ form.addEventListener('submit', async e=>{
       seasonGDD=round(s);
     }catch(err){ seasonGDD=null; }
 
-    // 3b. plants actually observed near this ZIP (iNaturalist, ranked by abundance)
-    setLoading(true,'Checking what grows near you...');
-    let localForage=[];
-    try{
-      const iUrl=`https://api.inaturalist.org/v1/observations/species_counts`+
-        `?lat=${lat}&lng=${lon}&radius=50&iconic_taxa=Plantae&quality_grade=research&per_page=200`;
-      const idata=await fetchJSON(iUrl);
-      const species=(idata.results||[]).map(x=>({
-        sci:x.taxon&&x.taxon.name,
-        common:x.taxon&&x.taxon.preferred_common_name,
-        count:x.count
-      }));
-      localForage=buildLocalForage(species);
-    }catch(e){ localForage=[]; }
-
-    // 4. model
-    setLoading(true,'Matching local plants to the bloom calendar...');
+    // 3b. what grows near this ZIP, and what is actually in flower now (iNaturalist)
+    setLoading(true,'Checking what grows and blooms near you...');
     const now2=new Date();
     const month=now2.getMonth()+1;
     const doy=Math.floor((now2 - new Date(now2.getFullYear(),0,0))/86400000);
-    const result=runModel({city,state,month,lat,doy,curTemp,rain30,seasonGDD,gdd30,forage,localForage});
+    const nextMonths=[]; for(let k=1;k<=3;k++){ let mm=month+k; while(mm>12) mm-=12; nextMonths.push(mm); }
+    let localForage=[], floweringNow=[], floweringSoon=[];
+    try{
+      const [sp, nowSet, soonSet] = await Promise.all([
+        iNatSpecies(lat,lon,50).catch(()=>[]),
+        iNatFlowering(lat,lon,120,String(month)).catch(()=>[]),
+        iNatFlowering(lat,lon,120,nextMonths.join(',')).catch(()=>[])
+      ]);
+      localForage=buildLocalForage(sp);
+      floweringNow=nowSet;
+      floweringSoon=soonSet;
+    }catch(e){}
+
+    // 4. model
+    setLoading(true,'Reading what is in bloom near you...');
+    const result=runModel({city,state,month,lat,doy,curTemp,rain30,seasonGDD,gdd30,forage,localForage,floweringNow,floweringSoon});
 
     render(city,state,result);
     setLoading(false);
     track('lookup', 'ZIP lookup');
     track('verdict/'+result.verdict, 'Verdict '+result.verdict);
     track('state/'+state, 'State '+state);
+    try{ localStorage.setItem('honeyflo_zip', zip); }catch(e){}
   }catch(err){
     setLoading(false);
     if(err && err.kind==='geo') showError('That ZIP code was not found. Check it and try again.');
@@ -1266,7 +1306,7 @@ function render(city,state,r){
   if(r.coming.length){
     comeHTML=r.coming.map(c=>{
       const s=c.s;
-      const win=MONTHS[c.openMonth-1];
+      const win=c.openMonth?MONTHS[c.openMonth-1]:'Soon';
       const tlabel = s.t==='both'?'Nectar + pollen' : s.t==='nectar'?'Nectar':'Pollen';
       const wt=s.w||'';
       return `<div class="plant${wt?' has-wiki':''}"${wt?` data-wiki="${esc(wt)}" tabindex="0" role="button" aria-expanded="false"`:''}>
@@ -1286,9 +1326,14 @@ function render(city,state,r){
 
   // season-shift note: only when the latitude + GDD offset is at least about a week
   const shiftWeeks=Math.round(Math.abs(r.seasonShift||0)*4.345);
-  const shiftNote = shiftWeeks>=1
+  const shiftNote = (!r.realBloom && shiftWeeks>=1)
     ? `Bloom timing is set about ${shiftWeeks} week${shiftWeeks>1?'s':''} ${r.seasonShift>0?'earlier':'later'} than the regional baseline, for your latitude and this season's heat.`
     : '';
+  const sourceNote = r.bloomSource==='flowering'
+    ? 'Blooming now is drawn from recent flowering records near your location.'
+    : r.bloomSource==='localcalendar'
+      ? 'Plants are matched to species recorded near your location, with timing estimated.'
+      : 'Plant list is from the regional calendar, local records were unavailable.';
 
   // estimated honey harvest window for this ZIP
   const harvest = r.harvest;
@@ -1361,7 +1406,7 @@ function render(city,state,r){
       <div class="conf">Confidence <b>${esc(r.confidence)}</b> · flow score ${r.score} / 100</div>
       <p class="caution">${esc(r.caution)}</p>
       ${shiftNote?`<p class="caution" style="margin-top:8px">${esc(shiftNote)}</p>`:''}
-      <p class="caution" style="margin-top:8px">${r.localUsed?'Plant list matched to species recorded near your location.':'Plant list from the regional calendar, local records were unavailable.'}</p>
+      <p class="caution" style="margin-top:8px">${esc(sourceNote)}</p>
     </div>
 
   `;
@@ -1372,6 +1417,15 @@ function render(city,state,r){
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ marker.style.left=r.score+'%'; }); });
   resultsEl.scrollIntoView({behavior:(matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'), block:'start'});
 }
+
+/* remember the last ZIP and show it on return, until a new one is entered */
+try{
+  const savedZip=localStorage.getItem('honeyflo_zip');
+  if(savedZip && /^\d{5}$/.test(savedZip)){
+    zipIn.value=savedZip;
+    form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+  }
+}catch(e){}
 </script>
 </body>
 </html>
